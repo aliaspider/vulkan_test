@@ -21,7 +21,12 @@ typedef struct
    {
       float width;
       float height;
-   } size;
+   } image;
+   struct
+   {
+      float width;
+      float height;
+   } screen;
    float angle;
 } uniforms_t;
 
@@ -43,13 +48,13 @@ bool handle_input(Display* display, Window window, uniforms_t* uniforms)
       else if(e.xkey.state & ControlMask)
       {
          if(e.xkey.keycode == XKeysymToKeycode(display, XK_Left))
-            uniforms->size.width += 0.1;
+            uniforms->image.width += 16.0f;
          if(e.xkey.keycode == XKeysymToKeycode(display, XK_Right))
-            uniforms->size.width -= 0.1;
+            uniforms->image.width -= 16.0f;
          if(e.xkey.keycode == XKeysymToKeycode(display, XK_Up))
-            uniforms->size.height += 0.1;
+            uniforms->image.height += 16.0f;
          if(e.xkey.keycode == XKeysymToKeycode(display, XK_Down))
-            uniforms->size.height -= 0.1;
+            uniforms->image.height -= 16.0f;
       }
       else
       {
@@ -59,13 +64,13 @@ bool handle_input(Display* display, Window window, uniforms_t* uniforms)
             return false;
          }
          if(e.xkey.keycode == XKeysymToKeycode(display, XK_Left))
-            uniforms->center.x -= 0.1;
+            uniforms->center.x -= 16.0f;
          if(e.xkey.keycode == XKeysymToKeycode(display, XK_Right))
-            uniforms->center.x += 0.1;
+            uniforms->center.x += 16.0f;
          if(e.xkey.keycode == XKeysymToKeycode(display, XK_Up))
-            uniforms->center.y -= 0.1;
+            uniforms->center.y -= 16.0f;
          if(e.xkey.keycode == XKeysymToKeycode(display, XK_Down))
-            uniforms->center.y += 0.1;
+            uniforms->center.y += 16.0f;
       }
       return true;
    }
@@ -128,8 +133,10 @@ int main(int argc, char **argv)
    uniforms_t *uniforms = ubo.mem.ptr;
    uniforms->center.x = 0.0f;
    uniforms->center.y = 0.0f;
-   uniforms->size.width  = 1.0f;
-   uniforms->size.height = 1.0f;
+   uniforms->image.width  = tex.width;
+   uniforms->image.height = tex.height;
+   uniforms->screen.width  = chain.viewport.width;
+   uniforms->screen.height = chain.viewport.height;
    uniforms->angle = 0.0f;
 
    descriptor_t desc;
@@ -145,10 +152,10 @@ int main(int argc, char **argv)
 
    static const uint32_t vs_code [] =
    #include "main.vert.inc"
-      ;
+   ;
    static const uint32_t fs_code [] =
    #include "main.frag.inc"
-      ;
+   ;
    shaders_t shaders;
    shaders_init(&vk, sizeof(vs_code), vs_code, sizeof(fs_code), fs_code, &shaders);   
 
@@ -197,8 +204,11 @@ int main(int argc, char **argv)
       vkResetFences(vk.device, 1, &queue_fence);
 
       {
-         VkCommandBufferBeginInfo commandBufferBeginInfo = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-         commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+         VkCommandBufferBeginInfo commandBufferBeginInfo =
+         {
+            VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+            .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
+         };
          vkBeginCommandBuffer(cmd, &commandBufferBeginInfo);
       }
 

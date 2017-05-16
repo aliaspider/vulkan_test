@@ -3,6 +3,8 @@
 
 void texture_init(const context_t *vk, int width, int height, texture_t* tex)
 {
+   tex->width = width;
+   tex->height = height;
    VkImageCreateInfo imageCreateInfo =
    {
       VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,

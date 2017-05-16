@@ -60,6 +60,8 @@ typedef struct
    VkSubresourceLayout layout;
    VkImageView view;
    VkSampler sampler;
+   int width;
+   int height;
 }texture_t;
 
 typedef struct

@@ -8,7 +8,8 @@ layout(location = 1) out vec4 vColor;
 layout(set = 0, binding = 0, std140) uniform UBO
 {
    vec2 center;
-   vec2 size;
+   vec2 image;
+   vec2 screen;
    float angle;
 }global;
 
@@ -30,10 +31,11 @@ void main()
 {
 //   gl_Position = vec4(gl_VertexIndex, gl_VertexIndex, 0.0f, 1.0f);
    gl_Position = Position;
-   gl_Position.xy *= global.size;
+   gl_Position.xy *= global.image;
    mat2 rot = mat2(cos(global.angle), -sin(global.angle), sin(global.angle), cos(global.angle));
    gl_Position.xy = rot * gl_Position.xy;
    gl_Position.xy += global.center;
+   gl_Position.xy /= global.screen;
 
    vTexCoord = TexCoord;
    vColor = Color;
