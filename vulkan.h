@@ -97,7 +97,7 @@ typedef struct
 typedef struct
 {
    VkPipeline handle;
-   VkPipelineLayout mem_layout;
+   VkPipelineLayout layout;
 }pipeline_t;
 
 void context_init(context_t* vk);

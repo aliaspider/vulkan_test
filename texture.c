@@ -58,10 +58,6 @@ void texture_init(const context_t *vk, int width, int height, texture_t* tex)
          .image = tex->image,
          .viewType = VK_IMAGE_VIEW_TYPE_2D,
          .format = VK_FORMAT_R8G8B8A8_SRGB,
-         .components.r = VK_COMPONENT_SWIZZLE_R,
-         .components.g = VK_COMPONENT_SWIZZLE_G,
-         .components.b = VK_COMPONENT_SWIZZLE_B,
-         .components.a = VK_COMPONENT_SWIZZLE_A,
          .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
          .subresourceRange.levelCount = 1,
          .subresourceRange.layerCount = 1
@@ -75,10 +71,6 @@ void texture_init(const context_t *vk, int width, int height, texture_t* tex)
          VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
          .magFilter = VK_FILTER_LINEAR,
          .minFilter = VK_FILTER_LINEAR,
-         .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-         .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
-         .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
-         .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
       };
       vkCreateSampler(vk->device, &samplerCreateInfo, NULL, &tex->sampler);
    }

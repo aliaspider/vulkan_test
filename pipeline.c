@@ -20,14 +20,16 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
       {
          VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
          .setLayoutCount = 1, &desc->set_layout,
-//         .pushConstantRangeCount = countof(ranges), ranges
+#if 0
+         .pushConstantRangeCount = countof(ranges), ranges
+#endif
       };
 
-      vkCreatePipelineLayout(vk->device, &info, NULL, &pipe->mem_layout);
+      vkCreatePipelineLayout(vk->device, &info, NULL, &pipe->layout);
    }
 
    {
-      const VkPipelineShaderStageCreateInfo shader_info[] =
+      const VkPipelineShaderStageCreateInfo shaders_info[] =
       {
          {
             VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -98,14 +100,14 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
       {
          VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
          .flags = VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT,
-         .stageCount = countof(shader_info), shader_info,
+         .stageCount = countof(shaders_info), shaders_info,
          .pVertexInputState = &vertex_input_state,
          .pInputAssemblyState = &input_assembly_state,
          .pViewportState = &viewport_state,
          .pRasterizationState = &rasterization_info,
          .pMultisampleState = &multisample_state,
          .pColorBlendState = &colorblend_state,
-         .layout = pipe->mem_layout,
+         .layout = pipe->layout,
          .renderPass = chain->renderpass,
          .subpass = 0
       };
@@ -115,8 +117,8 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
 
 void pipeline_free(const context_t *vk, pipeline_t *pipe)
 {
-   vkDestroyPipelineLayout(vk->device, pipe->mem_layout, NULL);
+   vkDestroyPipelineLayout(vk->device, pipe->layout, NULL);
    vkDestroyPipeline(vk->device, pipe->handle, NULL);
-   pipe->mem_layout = VK_NULL_HANDLE;
+   pipe->layout = VK_NULL_HANDLE;
    pipe->handle = VK_NULL_HANDLE;
 }

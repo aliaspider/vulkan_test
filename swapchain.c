@@ -27,9 +27,9 @@ void swapchain_init(const context_t* vk, int width, int height, VkPresentModeKHR
    /* init swapchain */
    VkSurfaceCapabilitiesKHR surfaceCapabilities;
    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk->gpu, chain->surface, &surfaceCapabilities);
+
    VkBool32 physicalDeviceSurfaceSupport;
-   vkGetPhysicalDeviceSurfaceSupportKHR(vk->gpu, vk->queue_family_index, chain->surface,
-                                        &physicalDeviceSurfaceSupport);
+   vkGetPhysicalDeviceSurfaceSupportKHR(vk->gpu, vk->queue_family_index, chain->surface, &physicalDeviceSurfaceSupport);
 
    uint32_t surfaceFormatcount;
    vkGetPhysicalDeviceSurfaceFormatsKHR(vk->gpu, chain->surface, &surfaceFormatcount, NULL);
@@ -86,8 +86,6 @@ void swapchain_init(const context_t* vk, int width, int height, VkPresentModeKHR
       VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
       .attachmentCount = countof(attachmentDescriptions), attachmentDescriptions,
       .subpassCount = countof(subpassDescriptions), subpassDescriptions,
-      //      .dependencyCount = 0,
-      //      .pDependencies = NULL
    };
 
    vkCreateRenderPass(vk->device, &renderPassCreateInfo, NULL, &chain->renderpass);
@@ -111,11 +109,8 @@ void swapchain_init(const context_t* vk, int width, int height, VkPresentModeKHR
             .image = swapchainImages[i],
             .viewType = VK_IMAGE_VIEW_TYPE_2D,
             .format = VK_FORMAT_B8G8R8A8_SRGB,
-            .components = {VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A},
             .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .subresourceRange.baseMipLevel = 0,
             .subresourceRange.levelCount = 1,
-            .subresourceRange.baseArrayLayer = 0,
             .subresourceRange.layerCount = 1
          };
          vkCreateImageView(vk->device, &info, NULL, &chain->views[i]);

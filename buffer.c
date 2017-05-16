@@ -36,7 +36,6 @@ void vertex_buffer_init(const context_t *vk, uint32_t size, const void *data, bu
    buffer_memory_init(vk, vbo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &vbo->mem);
 
    memcpy(vbo->mem.ptr, data, size);
-
    memory_flush(vk, &vbo->mem);
 
    vkUnmapMemory(vk->device, vbo->mem.handle);
