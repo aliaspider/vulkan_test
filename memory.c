@@ -14,12 +14,15 @@ void memory_init(const context_t* vk, const VkMemoryRequirements* reqs, VkMemory
          mem->size = reqs->size;
          mem->alignment = reqs->alignment;
 
-         VkMemoryAllocateInfo memoryAllocateInfo =
          {
-            VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, NULL,
-            reqs->size, type - vk->mem.memoryTypes
-         };
-         vkAllocateMemory(vk->device, &memoryAllocateInfo, NULL, &mem->handle);
+            const VkMemoryAllocateInfo info =
+            {
+               VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+               .allocationSize = reqs->size,
+               .memoryTypeIndex = type - vk->mem.memoryTypes
+            };
+            vkAllocateMemory(vk->device, &info, NULL, &mem->handle);
+         }
 
          if(req_flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
             vkMapMemory(vk->device, mem->handle, 0, mem->size, 0, &mem->ptr);
