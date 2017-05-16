@@ -3,14 +3,8 @@
 #include <string.h>
 #include "vulkan.h"
 
-void descriptors_init(const context_t *vk, int vertex_size, int attrib_count, const VkVertexInputAttributeDescription* attrib_desc,
-                      const buffer_t *ubo, const texture_t *tex, descriptor_t* desc)
+void descriptors_init(const context_t *vk, const buffer_t *ubo, const texture_t *tex, descriptor_t* desc)
 {
-   desc->vertex_input.size = vertex_size;
-   desc->vertex_input.count = attrib_count;
-   desc->vertex_input.desc = malloc(sizeof(*attrib_desc) * attrib_count);
-   memcpy(desc->vertex_input.desc, attrib_desc, sizeof(*attrib_desc) * attrib_count);
-
    VkDescriptorPoolSize descriptorPoolSizes[] =
    {
       {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1},
@@ -108,7 +102,4 @@ void descriptors_free(const context_t *vk, descriptor_t *desc)
    vkDestroyDescriptorSetLayout(vk->device, desc->set_layout, NULL);
    desc->pool = VK_NULL_HANDLE;
    desc->set_layout = VK_NULL_HANDLE;
-   free(desc->vertex_input.desc);
-   desc->vertex_input.desc = NULL;
-
 }

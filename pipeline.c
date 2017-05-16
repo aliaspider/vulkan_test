@@ -1,8 +1,9 @@
 
 #include "vulkan.h"
 
-void pipeline_init(const context_t* vk, const descriptor_t* desc, const swapchain_t* chain,
-                   const shaders_t *shaders, pipeline_t* pipe)
+void pipeline_init(const context_t* vk, const shaders_t *shaders,
+                   int vertex_size, int attrib_count, const VkVertexInputAttributeDescription* attrib_desc,
+                   const swapchain_t* chain, const descriptor_t* desc, pipeline_t* pipe)
 {
 
    VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo[] =
@@ -23,14 +24,14 @@ void pipeline_init(const context_t* vk, const descriptor_t* desc, const swapchai
 
    VkVertexInputBindingDescription vertexInputBindingDescription =
    {
-      0, desc->vertex_input.size, VK_VERTEX_INPUT_RATE_VERTEX
+      0, vertex_size, VK_VERTEX_INPUT_RATE_VERTEX
    };
 
    VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo =
    {
       VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
       .vertexBindingDescriptionCount = 1, &vertexInputBindingDescription,
-      .vertexAttributeDescriptionCount = desc->vertex_input.count, desc->vertex_input.desc
+      .vertexAttributeDescriptionCount = attrib_count, attrib_desc
    };
 
    VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo =

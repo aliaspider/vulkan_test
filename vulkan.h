@@ -76,12 +76,6 @@ typedef struct
    VkDescriptorPool pool;
    VkDescriptorSet set;
    VkDescriptorSetLayout set_layout;
-   struct
-   {
-      int size;
-      int count;
-      VkVertexInputAttributeDescription* desc;
-   }vertex_input;
 }descriptor_t;
 
 typedef struct
@@ -109,13 +103,15 @@ void vertex_buffer_init(const context_t *vk, uint32_t size, const void* data, bu
 void uniform_buffer_init(const context_t *vk, uint32_t size, buffer_t *ubo);
 void buffer_free(const context_t *vk, buffer_t *buffer);
 
-void descriptors_init(const context_t* vk, int vertex_size, int attrib_count, const VkVertexInputAttributeDescription *attrib_desc, const buffer_t* ubo, const texture_t* tex, descriptor_t* desc);
+void descriptors_init(const context_t* vk, const buffer_t* ubo, const texture_t* tex, descriptor_t* desc);
 void descriptors_free(const context_t* vk, descriptor_t* desc);
 
 void shaders_init(const context_t* vk, size_t vs_code_size, const uint32_t* vs_code, size_t fs_code_size, const uint32_t* fs_code, shaders_t *shaders);
 void shaders_free(const context_t* vk, shaders_t *shaders);
 
-void pipeline_init(const context_t* vk, const descriptor_t* desc, const swapchain_t* chain, const shaders_t *shaders, pipeline_t* pipe);
+void pipeline_init(const context_t* vk, const shaders_t *shaders,
+                   int vertex_size, int attrib_count, const VkVertexInputAttributeDescription* attrib_desc,
+                   const swapchain_t* chain, const descriptor_t* desc, pipeline_t* pipe);
 void pipeline_free(const context_t* vk, pipeline_t* pipe);
 
 void buffer_memory_init(const context_t* vk, VkBuffer buffer, VkMemoryPropertyFlags flags, device_memory_t* mem);

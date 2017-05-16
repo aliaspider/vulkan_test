@@ -140,30 +140,30 @@ int main(int argc, char **argv)
    uniforms->angle = 0.0f;
 
    descriptor_t desc;
+   descriptors_init(&vk, &ubo, &tex, &desc);
+
+   pipeline_t pipe;
    {
+      static const uint32_t vs_code [] =
+      #include "main.vert.inc"
+      ;
+      static const uint32_t fs_code [] =
+      #include "main.frag.inc"
+      ;
+
+      shaders_t shaders;
+      shaders_init(&vk, sizeof(vs_code), vs_code, sizeof(fs_code), fs_code, &shaders);
+
       VkVertexInputAttributeDescription attrib_desc[] =
       {
          {0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(vertex_t, position)},
          {1, 0, VK_FORMAT_R32G32_SFLOAT,       offsetof(vertex_t, texcoord)},
          {2, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(vertex_t, color)}
       };
-      descriptors_init(&vk, sizeof(vertex_t), countof(attrib_desc), attrib_desc, &ubo, &tex, &desc);
+      pipeline_init(&vk, &shaders, sizeof(vertex_t), countof(attrib_desc), attrib_desc, &chain, &desc, &pipe);
+
+      shaders_free(&vk, &shaders);
    }
-
-   static const uint32_t vs_code [] =
-   #include "main.vert.inc"
-   ;
-   static const uint32_t fs_code [] =
-   #include "main.frag.inc"
-   ;
-   shaders_t shaders;
-   shaders_init(&vk, sizeof(vs_code), vs_code, sizeof(fs_code), fs_code, &shaders);   
-
-   pipeline_t pipe;
-   pipeline_init(&vk, &desc, &chain, &shaders, &pipe);
-
-   shaders_free(&vk, &shaders);
-
 
    VkCommandBuffer cmd;
    {
