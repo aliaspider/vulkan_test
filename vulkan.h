@@ -114,7 +114,7 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
                    const swapchain_t* chain, const descriptor_t* desc, pipeline_t* pipe);
 void pipeline_free(const context_t* vk, pipeline_t* pipe);
 
-void buffer_memory_init(const context_t* vk, VkBuffer buffer, VkMemoryPropertyFlags flags, device_memory_t* mem);
-void image_memory_init(const context_t* vk, VkImage image, VkMemoryPropertyFlags flags, device_memory_t* mem);
+void buffer_memory_init(const context_t* vk, VkBuffer buffer, VkMemoryPropertyFlags req_flags, device_memory_t* mem);
+void image_memory_init(const context_t* vk, VkImage image, VkMemoryPropertyFlags req_flags, device_memory_t* mem);
 void memory_free(const context_t* vk, device_memory_t* mem);
 void memory_flush(const context_t* vk, const device_memory_t* mem);

@@ -41,9 +41,9 @@ bool handle_input(Display* display, Window window, uniforms_t* uniforms)
       if(e.xkey.state & Mod1Mask)
       {
          if(e.xkey.keycode == XKeysymToKeycode(display, XK_Left))
-            uniforms->angle += M_PI / 60;
+            uniforms->angle += M_PI / 64;
          if(e.xkey.keycode == XKeysymToKeycode(display, XK_Right))
-            uniforms->angle -= M_PI / 60;
+            uniforms->angle -= M_PI / 64;
       }
       else if(e.xkey.state & ControlMask)
       {
@@ -129,14 +129,6 @@ int main(int argc, char **argv)
 
    buffer_t  ubo;
    uniform_buffer_init(&vk, sizeof(uniforms_t), &ubo);
-   uniforms_t *uniforms = ubo.mem.ptr;
-   uniforms->center.x = 0.0f;
-   uniforms->center.y = 0.0f;
-   uniforms->image.width  = tex.width;
-   uniforms->image.height = tex.height;
-   uniforms->screen.width  = chain.viewport.width;
-   uniforms->screen.height = chain.viewport.height;
-   uniforms->angle = 0.0f;
 
    descriptor_t desc;
    descriptors_init(&vk, &ubo, &tex, &desc);
@@ -167,7 +159,7 @@ int main(int argc, char **argv)
 
    VkCommandBuffer cmd;
    {
-      const VkCommandBufferAllocateInfo info=
+      const VkCommandBufferAllocateInfo info =
       {
          VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
          .commandPool = vk.cmd_pool,
@@ -193,6 +185,15 @@ int main(int argc, char **argv)
    struct timespec start_time;
    clock_gettime(CLOCK_MONOTONIC, &start_time);
 
+   uniforms_t *uniforms = ubo.mem.ptr;
+   uniforms->center.x = 0.0f;
+   uniforms->center.y = 0.0f;
+   uniforms->image.width  = tex.width;
+   uniforms->image.height = tex.height;
+   uniforms->screen.width  = chain.viewport.width;
+   uniforms->screen.height = chain.viewport.height;
+   uniforms->angle = 0.0f;
+
    while (running)
    {
       uint32_t image_index;
@@ -212,30 +213,34 @@ int main(int argc, char **argv)
          vkBeginCommandBuffer(cmd, &info);
       }
 
+      /* renderpass */
       {
-         const VkClearValue clearValue = {{{0.0f, 0.1f, 1.0f, 0.0f}}};
-         const VkRenderPassBeginInfo info =
          {
-            VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-            .renderPass = chain.renderpass,
-            .framebuffer = chain.framebuffers[image_index],
-            .renderArea = chain.scissor,
-            .clearValueCount = 1,
-            .pClearValues = &clearValue
-         };
-         vkCmdBeginRenderPass(cmd, &info, VK_SUBPASS_CONTENTS_INLINE);
+            const VkClearValue clearValue = {{{0.0f, 0.1f, 1.0f, 0.0f}}};
+            const VkRenderPassBeginInfo info =
+            {
+               VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+               .renderPass = chain.renderpass,
+               .framebuffer = chain.framebuffers[image_index],
+               .renderArea = chain.scissor,
+               .clearValueCount = 1,
+               .pClearValues = &clearValue
+            };
+            vkCmdBeginRenderPass(cmd, &info, VK_SUBPASS_CONTENTS_INLINE);
+         }
+
+         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipe.handle);
+         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipe.layout, 0, 1, &desc.set, 0 , NULL);
+   //      vkCmdPushConstants(vk.cmd, vk.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uniforms_t), mapped_uniforms);
+
+         VkDeviceSize offset = 0;
+         vkCmdBindVertexBuffers(cmd, 0, 1, &vbo.handle, &offset);
+
+         vkCmdDraw(cmd, 4, 1, 0, 0);
+
+         vkCmdEndRenderPass(cmd);
       }
 
-      vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipe.handle);
-      vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipe.layout, 0, 1, &desc.set, 0 , NULL);
-//      vkCmdPushConstants(vk.cmd, vk.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uniforms_t), mapped_uniforms);
-
-      VkDeviceSize offset = 0;
-      vkCmdBindVertexBuffers(cmd, 0, 1, &vbo.handle, &offset);
-
-      vkCmdDraw(cmd, 4, 1, 0, 0);
-
-      vkCmdEndRenderPass(cmd);
       vkEndCommandBuffer(cmd);
 
       {
@@ -275,12 +280,13 @@ int main(int argc, char **argv)
          start_time = end_time;
          fflush(stdout);
       }
-   }
+   }   
+   printf("\n");
 
-   vkWaitForFences(vk.device, 1, &queue_fence, VK_TRUE, -1);
+   vkWaitForFences(vk.device, 1, &queue_fence, VK_TRUE, UINT64_MAX);
    vkDestroyFence(vk.device, queue_fence, NULL);
 
-   vkWaitForFences(vk.device, 1, &chain_fence, VK_TRUE, -1);
+   vkWaitForFences(vk.device, 1, &chain_fence, VK_TRUE, UINT64_MAX);
    vkDestroyFence(vk.device, chain_fence, NULL);
 
    pipeline_free(&vk, &pipe);
@@ -291,6 +297,5 @@ int main(int argc, char **argv)
    swapchain_free(&vk, &chain);
    context_free(&vk);
 
-   printf("\n");
    return 0;
 }
