@@ -160,6 +160,7 @@ int main(int argc, char **argv)
          {1, 0, VK_FORMAT_R32G32_SFLOAT,       offsetof(vertex_t, texcoord)},
          {2, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(vertex_t, color)}
       };
+
       pipeline_init(&vk, &shaders, sizeof(vertex_t), countof(attrib_desc), attrib_desc, &chain, &desc, &pipe);
 
       shaders_free(&vk, &shaders);
