@@ -25,29 +25,6 @@ typedef struct
    float angle;
 } uniforms_t;
 
-typedef struct
-{
-   struct
-   {
-      float x, y, z, w;
-   } position;
-   struct
-   {
-      float u, v;
-   } texcoord;
-   struct
-   {
-      float r, g, b, a;
-   } color;
-} vertex_t;
-
-static const uint32_t vs_code [] =
-#include "main.vert.inc"
-   ;
-static const uint32_t fs_code [] =
-#include "main.frag.inc"
-   ;
-
 bool running = true;
 
 #ifdef VK_USE_PLATFORM_XLIB_KHR
@@ -117,8 +94,25 @@ int main(int argc, char **argv)
    memory_flush(&vk, &tex.mem);
    png_file_free(&png);
 
+   typedef struct
+   {
+      struct
+      {
+         float x, y, z, w;
+      } position;
+      struct
+      {
+         float u, v;
+      } texcoord;
+      struct
+      {
+         float r, g, b, a;
+      } color;
+   } vertex_t;
+
    buffer_t vbo;
    {
+
       vertex_t vertices[] =
       {
          {{-1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
@@ -149,6 +143,12 @@ int main(int argc, char **argv)
       descriptors_init(&vk, sizeof(vertex_t), countof(attrib_desc), attrib_desc, &ubo, &tex, &desc);
    }
 
+   static const uint32_t vs_code [] =
+   #include "main.vert.inc"
+      ;
+   static const uint32_t fs_code [] =
+   #include "main.frag.inc"
+      ;
    shaders_t shaders;
    shaders_init(&vk, sizeof(vs_code), vs_code, sizeof(fs_code), fs_code, &shaders);   
 
