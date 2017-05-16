@@ -82,12 +82,15 @@ int main(int argc, char **argv)
 {
    printf("Vulkan test:\n");
 
-
    context_t vk;
    context_init(&vk);
 
    swapchain_t chain;
+#if 1
+   swapchain_init(&vk, 640, 480, VK_PRESENT_MODE_FIFO_KHR, &chain);
+#else
    swapchain_init(&vk, 640, 480, VK_PRESENT_MODE_IMMEDIATE_KHR, &chain);
+#endif
 
    png_file_t png;
    png_file_init("texture.png", &png);
@@ -95,7 +98,9 @@ int main(int argc, char **argv)
    texture_t tex;
    texture_init(&vk, png.width, png.height, &tex);
 
+   /* texture updates are written to the stating texture then uploaded later */
    png_file_read(&png, tex.staging.mem.u8 + tex.staging.mem_layout.offset, tex.staging.mem_layout.rowPitch);
+   memory_flush(&vk, &tex.staging.mem);
    tex.dirty = true;
 
    png_file_free(&png);
@@ -215,7 +220,7 @@ int main(int argc, char **argv)
       }
 
       if(tex.dirty)
-         texture_update(&vk, cmd, &tex);
+         texture_update(cmd, &tex);
 
       /* renderpass */
       {

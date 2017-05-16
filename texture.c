@@ -6,6 +6,7 @@ void texture_init(const context_t *vk, int width, int height, texture_t* tex)
    tex->width = width;
    tex->height = height;
    tex->dirty = true;
+
    {
       VkImageCreateInfo info =
       {
@@ -97,10 +98,8 @@ void texture_free(const context_t *vk, texture_t *tex)
    tex->image = VK_NULL_HANDLE;
 }
 
-void texture_update(const context_t* vk, VkCommandBuffer cmd, texture_t* tex)
+void texture_update(VkCommandBuffer cmd, texture_t* tex)
 {
-   memory_flush(vk, &tex->staging.mem);
-
    VkImageMemoryBarrier barrier =
    {
       VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
