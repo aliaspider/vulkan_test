@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <vulkan/vulkan.h>
 
 #define MAX_SWAPCHAIN_IMAGES 8
@@ -55,13 +56,22 @@ typedef struct
 
 typedef struct
 {
+   struct
+   {
+      device_memory_t mem;
+      VkImage image;
+      VkSubresourceLayout mem_layout;
+      VkImageLayout layout;
+   }staging;
    device_memory_t mem;
    VkImage image;
-   VkSubresourceLayout layout;
+   VkSubresourceLayout mem_layout;
+   VkImageLayout layout;
    VkImageView view;
    VkSampler sampler;
    int width;
    int height;
+   bool dirty;
 }texture_t;
 
 typedef struct
@@ -87,7 +97,7 @@ typedef struct
 typedef struct
 {
    VkPipeline handle;
-   VkPipelineLayout layout;
+   VkPipelineLayout mem_layout;
 }pipeline_t;
 
 void context_init(context_t* vk);
@@ -98,6 +108,7 @@ void swapchain_free(const context_t *vk, swapchain_t *chain);
 
 void texture_init(const context_t* vk, int width, int height, texture_t* tex);
 void texture_free(const context_t* vk, texture_t* tex);
+void texture_update(const context_t* vk, VkCommandBuffer cmd, texture_t* tex);
 
 void vertex_buffer_init(const context_t *vk, uint32_t size, const void* data, buffer_t *vbo);
 void uniform_buffer_init(const context_t *vk, uint32_t size, buffer_t *ubo);

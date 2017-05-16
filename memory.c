@@ -26,6 +26,8 @@ void memory_init(const context_t* vk, const VkMemoryRequirements* reqs, VkMemory
 
          if(req_flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
             vkMapMemory(vk->device, mem->handle, 0, mem->size, 0, &mem->ptr);
+         else
+            mem->ptr = NULL;
 
          return;
       }

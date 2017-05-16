@@ -23,7 +23,7 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
 //         .pushConstantRangeCount = countof(ranges), ranges
       };
 
-      vkCreatePipelineLayout(vk->device, &info, NULL, &pipe->layout);
+      vkCreatePipelineLayout(vk->device, &info, NULL, &pipe->mem_layout);
    }
 
    {
@@ -105,7 +105,7 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
          .pRasterizationState = &rasterization_info,
          .pMultisampleState = &multisample_state,
          .pColorBlendState = &colorblend_state,
-         .layout = pipe->layout,
+         .layout = pipe->mem_layout,
          .renderPass = chain->renderpass,
          .subpass = 0
       };
@@ -115,8 +115,8 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
 
 void pipeline_free(const context_t *vk, pipeline_t *pipe)
 {
-   vkDestroyPipelineLayout(vk->device, pipe->layout, NULL);
+   vkDestroyPipelineLayout(vk->device, pipe->mem_layout, NULL);
    vkDestroyPipeline(vk->device, pipe->handle, NULL);
-   pipe->layout = VK_NULL_HANDLE;
+   pipe->mem_layout = VK_NULL_HANDLE;
    pipe->handle = VK_NULL_HANDLE;
 }
