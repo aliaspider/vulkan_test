@@ -104,32 +104,35 @@ void swapchain_init(const context_t* vk, int width, int height, VkPresentModeKHR
    int i;
    for (i = 0; i < chain->count; i++)
    {
-      VkImageViewCreateInfo imageViewCreateInfo =
       {
-         VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-         .image = swapchainImages[i],
-         .viewType = VK_IMAGE_VIEW_TYPE_2D,
-         .format = VK_FORMAT_B8G8R8A8_SRGB,
-         .components = {VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A},
-         .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-         .subresourceRange.baseMipLevel = 0,
-         .subresourceRange.levelCount = 1,
-         .subresourceRange.baseArrayLayer = 0,
-         .subresourceRange.layerCount = 1
-      };
+         VkImageViewCreateInfo info =
+         {
+            VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .image = swapchainImages[i],
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .format = VK_FORMAT_B8G8R8A8_SRGB,
+            .components = {VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A},
+            .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .subresourceRange.baseMipLevel = 0,
+            .subresourceRange.levelCount = 1,
+            .subresourceRange.baseArrayLayer = 0,
+            .subresourceRange.layerCount = 1
+         };
+         vkCreateImageView(vk->device, &info, NULL, &chain->views[i]);
+      }
 
-      vkCreateImageView(vk->device, &imageViewCreateInfo, NULL, &chain->views[i]);
-
-      VkFramebufferCreateInfo framebufferCreateInfo =
       {
-         VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-         .renderPass = chain->renderpass,
-         .attachmentCount = 1, &chain->views[i],
-         .width = width,
-         .height = height,
-         .layers = 1
-      };
-      vkCreateFramebuffer(vk->device, &framebufferCreateInfo, NULL, &chain->framebuffers[i]);
+         VkFramebufferCreateInfo info =
+         {
+            VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+            .renderPass = chain->renderpass,
+            .attachmentCount = 1, &chain->views[i],
+            .width = width,
+            .height = height,
+            .layers = 1
+         };
+         vkCreateFramebuffer(vk->device, &info, NULL, &chain->framebuffers[i]);
+      }
    }
 
    chain->viewport.x = 0.0f;

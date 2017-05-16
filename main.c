@@ -117,8 +117,7 @@ int main(int argc, char **argv)
 
    buffer_t vbo;
    {
-
-      vertex_t vertices[] =
+      const vertex_t vertices[] =
       {
          {{-1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
          {{ 1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
@@ -154,7 +153,7 @@ int main(int argc, char **argv)
       shaders_t shaders;
       shaders_init(&vk, sizeof(vs_code), vs_code, sizeof(fs_code), fs_code, &shaders);
 
-      VkVertexInputAttributeDescription attrib_desc[] =
+      const VkVertexInputAttributeDescription attrib_desc[] =
       {
          {0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(vertex_t, position)},
          {1, 0, VK_FORMAT_R32G32_SFLOAT,       offsetof(vertex_t, texcoord)},
@@ -168,26 +167,26 @@ int main(int argc, char **argv)
 
    VkCommandBuffer cmd;
    {
-      VkCommandBufferAllocateInfo commandBufferAllocateInfo =
+      const VkCommandBufferAllocateInfo info=
       {
          VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
          .commandPool = vk.cmd_pool,
          .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
          .commandBufferCount = 1
       };
-      vkAllocateCommandBuffers(vk.device, &commandBufferAllocateInfo, &cmd);
+      vkAllocateCommandBuffers(vk.device, &info, &cmd);
    }
 
    VkFence queue_fence;
    VkFence chain_fence;
    {
-      VkFenceCreateInfo fcinfo =
+      VkFenceCreateInfo info =
       {
          VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
          .flags = VK_FENCE_CREATE_SIGNALED_BIT
       };
-      vkCreateFence(vk.device, &fcinfo, NULL, &chain_fence);
-      vkCreateFence(vk.device, &fcinfo, NULL, &queue_fence);
+      vkCreateFence(vk.device, &info, NULL, &chain_fence);
+      vkCreateFence(vk.device, &info, NULL, &queue_fence);
    }
 
    int frames = 0;
@@ -205,17 +204,17 @@ int main(int argc, char **argv)
       vkResetFences(vk.device, 1, &queue_fence);
 
       {
-         VkCommandBufferBeginInfo commandBufferBeginInfo =
+         const VkCommandBufferBeginInfo info =
          {
             VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
             .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
          };
-         vkBeginCommandBuffer(cmd, &commandBufferBeginInfo);
+         vkBeginCommandBuffer(cmd, &info);
       }
 
       {
-         VkClearValue clearValue = {{{0.0f, 0.1f, 1.0f, 0.0f}}};
-         VkRenderPassBeginInfo renderPassBeginInfo =
+         const VkClearValue clearValue = {{{0.0f, 0.1f, 1.0f, 0.0f}}};
+         const VkRenderPassBeginInfo info =
          {
             VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
             .renderPass = chain.renderpass,
@@ -224,15 +223,15 @@ int main(int argc, char **argv)
             .clearValueCount = 1,
             .pClearValues = &clearValue
          };
-         vkCmdBeginRenderPass(cmd, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+         vkCmdBeginRenderPass(cmd, &info, VK_SUBPASS_CONTENTS_INLINE);
       }
 
       vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipe.handle);
       vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipe.layout, 0, 1, &desc.set, 0 , NULL);
 //      vkCmdPushConstants(vk.cmd, vk.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uniforms_t), mapped_uniforms);
 
-      VkDeviceSize vbo_offset = 0;
-      vkCmdBindVertexBuffers(cmd, 0, 1, &vbo.handle, &vbo_offset);
+      VkDeviceSize offset = 0;
+      vkCmdBindVertexBuffers(cmd, 0, 1, &vbo.handle, &offset);
 
       vkCmdDraw(cmd, 4, 1, 0, 0);
 
@@ -240,24 +239,24 @@ int main(int argc, char **argv)
       vkEndCommandBuffer(cmd);
 
       {
-         VkSubmitInfo submitInfo =
+         const VkSubmitInfo info =
          {
             VK_STRUCTURE_TYPE_SUBMIT_INFO,
             .commandBufferCount = 1,
             .pCommandBuffers = &cmd
          };
-         vkQueueSubmit(vk.queue, 1, &submitInfo, queue_fence);
+         vkQueueSubmit(vk.queue, 1, &info, queue_fence);
       }
 
       {
-         VkPresentInfoKHR presentInfo =
+         const VkPresentInfoKHR info =
          {
             VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
             .swapchainCount = 1,
             .pSwapchains = &chain.handle,
             .pImageIndices = &image_index
          };
-         vkQueuePresentKHR(vk.queue, &presentInfo);
+         vkQueuePresentKHR(vk.queue, &info);
       }
 
       struct timespec end_time;

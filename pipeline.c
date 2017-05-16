@@ -5,8 +5,7 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
                    int vertex_size, int attrib_count, const VkVertexInputAttributeDescription* attrib_desc,
                    const swapchain_t* chain, const descriptor_t* desc, pipeline_t* pipe)
 {
-
-   VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo[] =
+   const VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo[] =
    {
       {
          VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -22,33 +21,33 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
       }
    };
 
-   VkVertexInputBindingDescription vertexInputBindingDescription =
+   const VkVertexInputBindingDescription vertexInputBindingDescription =
    {
       0, vertex_size, VK_VERTEX_INPUT_RATE_VERTEX
    };
 
-   VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo =
+   const VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo =
    {
       VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
       .vertexBindingDescriptionCount = 1, &vertexInputBindingDescription,
       .vertexAttributeDescriptionCount = attrib_count, attrib_desc
    };
 
-   VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo =
+   const VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo =
    {
       VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
       .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN,
       .primitiveRestartEnable = VK_FALSE
    };
 
-   VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo =
+   const VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo =
    {
       VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
       .viewportCount = 1, &chain->viewport,
       .scissorCount = 1, &chain->scissor
    };
 
-   VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo =
+   const VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo =
    {
       VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
 //      .depthClampEnable = VK_FALSE,
@@ -63,20 +62,20 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
       .lineWidth = 1.0f
    };
 
-   VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo =
+   const VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo =
    {
       VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
       .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
    };
 
-   VkPipelineColorBlendAttachmentState colorBlendAttachmentState =
+   const VkPipelineColorBlendAttachmentState colorBlendAttachmentState =
    {
       .blendEnable = VK_FALSE,
       .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
       VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
    };
 
-   VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo =
+   const VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo =
    {
       VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
       .attachmentCount = 1, &colorBlendAttachmentState
@@ -91,16 +90,18 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
 //      }
 //   };
 
-   VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo =
    {
-      VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-      .setLayoutCount = 1, &desc->set_layout,
-//      .pushConstantRangeCount = countof(pushConstantRanges), pushConstantRanges
-   };
+      const VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo =
+      {
+         VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+         .setLayoutCount = 1, &desc->set_layout,
+//         .pushConstantRangeCount = countof(pushConstantRanges), pushConstantRanges
+      };
 
-   vkCreatePipelineLayout(vk->device, &pipelineLayoutCreateInfo, NULL, &pipe->layout);
+      vkCreatePipelineLayout(vk->device, &pipelineLayoutCreateInfo, NULL, &pipe->layout);
+   }
 
-   VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo =
+   const VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo =
    {
       VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
       .flags = VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT,
@@ -115,7 +116,6 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
       .renderPass = chain->renderpass,
       .subpass = 0
    };
-
    vkCreateGraphicsPipelines(vk->device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, NULL, &pipe->handle);
 }
 

@@ -5,28 +5,34 @@
 void uniform_buffer_init(const context_t *vk, uint32_t size, buffer_t* ubo)
 {
    ubo->size = size;
-   VkBufferCreateInfo uniformBufferCreateInfo =
-   {
-      VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, NULL, 0,
-      ubo->size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-      VK_SHARING_MODE_EXCLUSIVE, 0, NULL
-   };
 
-   vkCreateBuffer(vk->device, &uniformBufferCreateInfo, NULL, &ubo->handle);
+   {
+      const VkBufferCreateInfo info =
+      {
+         VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, NULL, 0,
+         ubo->size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+         VK_SHARING_MODE_EXCLUSIVE, 0, NULL
+      };
+      vkCreateBuffer(vk->device, &info, NULL, &ubo->handle);
+   }
+
    buffer_memory_init(vk, ubo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &ubo->mem);
 }
 
 void vertex_buffer_init(const context_t *vk, uint32_t size, const void *data, buffer_t* vbo)
 {
    vbo->size = size;
-   VkBufferCreateInfo vertexBufferCreateInfo =
-   {
-      VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, NULL, 0,
-      size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-      VK_SHARING_MODE_EXCLUSIVE, 0, NULL
-   };
 
-   vkCreateBuffer(vk->device, &vertexBufferCreateInfo, NULL, &vbo->handle);
+   {
+      const VkBufferCreateInfo info =
+      {
+         VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, NULL, 0,
+         size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+         VK_SHARING_MODE_EXCLUSIVE, 0, NULL
+      };
+      vkCreateBuffer(vk->device, &info, NULL, &vbo->handle);
+   }
+
    buffer_memory_init(vk, vbo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &vbo->mem);
 
    memcpy(vbo->mem.ptr, data, size);
