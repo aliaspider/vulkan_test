@@ -1,0 +1,122 @@
+#pragma once
+
+#include <vulkan/vulkan.h>
+
+#define MAX_SWAPCHAIN_IMAGES 8
+#define countof(a) (sizeof(a)/ sizeof(*a))
+#define VULKAN_CALL(fname, instance, ...)                                      \
+  ((PFN_##fname)vkGetInstanceProcAddr(instance, #fname))(instance, __VA_ARGS__)
+
+typedef struct
+{
+   VkInstance instance;
+   VkDebugReportCallbackEXT debug_cb;
+   VkPhysicalDevice gpu;
+   VkPhysicalDeviceMemoryProperties mem;
+   VkDevice device;
+   uint32_t queue_family_index;
+   VkQueue queue;
+   VkCommandPool cmd_pool;
+}context_t;
+
+typedef struct
+{
+   VkSurfaceKHR surface;
+   VkSwapchainKHR handle;
+   VkRect2D scissor;
+   VkViewport viewport;
+   VkRenderPass renderpass;
+   uint32_t count;
+   VkImageView views[MAX_SWAPCHAIN_IMAGES];
+   VkFramebuffer framebuffers[MAX_SWAPCHAIN_IMAGES];
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+   Display *display;
+   Window   window;
+#endif
+}swapchain_t;
+
+typedef struct
+{
+   VkDeviceMemory handle;
+   VkMemoryPropertyFlags flags;
+   VkDeviceSize size;
+   VkDeviceSize alignment;
+   union
+   {
+      void* ptr;
+      uint8_t* u8;
+      uint32_t* u32;
+      uint64_t* u64;
+      int8_t* s8;
+      int32_t* s32;
+      int64_t* s64;
+   };
+}device_memory_t;
+
+typedef struct
+{
+   device_memory_t mem;
+   VkImage image;
+   VkSubresourceLayout layout;
+   VkImageView view;
+   VkSampler sampler;
+}texture_t;
+
+typedef struct
+{
+   device_memory_t mem;
+   VkBuffer handle;
+   VkDeviceSize size;
+}buffer_t;
+
+typedef struct
+{
+   VkDescriptorPool pool;
+   VkDescriptorSet set;
+   VkDescriptorSetLayout set_layout;
+   struct
+   {
+      int size;
+      int count;
+      VkVertexInputAttributeDescription* desc;
+   }vertex_input;
+}descriptor_t;
+
+typedef struct
+{
+   VkShaderModule vs;
+   VkShaderModule fs;
+}shaders_t;
+
+typedef struct
+{
+   VkPipeline handle;
+   VkPipelineLayout layout;
+}pipeline_t;
+
+void context_init(context_t* vk);
+void context_free(context_t* vk);
+
+void swapchain_init(const context_t *vk, int width, int height, VkPresentModeKHR present_mode, swapchain_t *chain);
+void swapchain_free(const context_t *vk, swapchain_t *chain);
+
+void texture_init(const context_t* vk, int width, int height, texture_t* tex);
+void texture_free(const context_t* vk, texture_t* tex);
+
+void vertex_buffer_init(const context_t *vk, uint32_t size, const void* data, buffer_t *vbo);
+void uniform_buffer_init(const context_t *vk, uint32_t size, buffer_t *ubo);
+void buffer_free(const context_t *vk, buffer_t *buffer);
+
+void descriptors_init(const context_t* vk, int vertex_size, int attrib_count, const VkVertexInputAttributeDescription *attrib_desc, const buffer_t* ubo, const texture_t* tex, descriptor_t* desc);
+void descriptors_free(const context_t* vk, descriptor_t* desc);
+
+void shaders_init(const context_t* vk, size_t vs_code_size, const uint32_t* vs_code, size_t fs_code_size, const uint32_t* fs_code, shaders_t *shaders);
+void shaders_free(const context_t* vk, shaders_t *shaders);
+
+void pipeline_init(const context_t* vk, const descriptor_t* desc, const swapchain_t* chain, const shaders_t *shaders, pipeline_t* pipe);
+void pipeline_free(const context_t* vk, pipeline_t* pipe);
+
+void buffer_memory_init(const context_t* vk, VkBuffer buffer, VkMemoryPropertyFlags flags, device_memory_t* mem);
+void image_memory_init(const context_t* vk, VkImage image, VkMemoryPropertyFlags flags, device_memory_t* mem);
+void memory_free(const context_t* vk, device_memory_t* mem);
+void memory_flush(const context_t* vk, const device_memory_t* mem);
