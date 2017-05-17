@@ -53,7 +53,14 @@ void context_init(context_t* vk)
          "VK_LAYER_LUNARG_parameter_validation",
          "VK_LAYER_GOOGLE_threading"
       };
-      const char *instance_ext[] = {"VK_EXT_debug_report", "VK_KHR_surface", "VK_KHR_xlib_surface" };
+      const char *instance_ext[] =
+      {
+         VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+         VK_KHR_SURFACE_EXTENSION_NAME,
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+         VK_KHR_XLIB_SURFACE_EXTENSION_NAME,
+#endif
+      };
 #if 0
       uint32_t lprop_count;
       vkEnumerateInstanceLayerProperties(&lprop_count, NULL);

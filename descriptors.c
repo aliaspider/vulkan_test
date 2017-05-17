@@ -29,15 +29,13 @@ void descriptors_init(const context_t *vk, const buffer_t *ubo, const texture_t 
             .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .descriptorCount = 1,
             .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-
          },
          {
             .binding = 1,
             .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
             .descriptorCount = 1,
             .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
-   //         .pImmutableSamplers = &vk.texture_sampler
-
+//            .pImmutableSamplers = &vk.texture_sampler
          }
       };
 

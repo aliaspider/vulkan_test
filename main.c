@@ -92,18 +92,20 @@ int main(int argc, char **argv)
    swapchain_init(&vk, 640, 480, VK_PRESENT_MODE_IMMEDIATE_KHR, &chain);
 #endif
 
-   png_file_t png;
-   png_file_init("texture.png", &png);
-
    texture_t tex;
-   texture_init(&vk, png.width, png.height, &tex);
+   {
+      png_file_t png;
+      png_file_init("texture.png", &png);
 
-   /* texture updates are written to the stating texture then uploaded later */
-   png_file_read(&png, tex.staging.mem.u8 + tex.staging.mem_layout.offset, tex.staging.mem_layout.rowPitch);
-   memory_flush(&vk, &tex.staging.mem);
-   tex.dirty = true;
+      texture_init(&vk, png.width, png.height, &tex);
 
-   png_file_free(&png);
+      /* texture updates are written to the stating texture then uploaded later */
+      png_file_read(&png, tex.staging.mem.u8 + tex.staging.mem_layout.offset, tex.staging.mem_layout.rowPitch);
+      memory_flush(&vk, &tex.staging.mem);
+      tex.dirty = true;
+
+      png_file_free(&png);
+   }
 
    typedef struct
    {
@@ -240,12 +242,12 @@ int main(int argc, char **argv)
 
          vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipe.handle);
          vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipe.layout, 0, 1, &desc.set, 0 , NULL);
-   //      vkCmdPushConstants(vk.cmd, vk.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uniforms_t), mapped_uniforms);
+//         vkCmdPushConstants(vk.cmd, vk.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uniforms_t), mapped_uniforms);
 
          VkDeviceSize offset = 0;
          vkCmdBindVertexBuffers(cmd, 0, 1, &vbo.handle, &offset);
 
-         vkCmdDraw(cmd, 4, 1, 0, 0);
+         vkCmdDraw(cmd, vbo.size / sizeof(vertex_t), 1, 0, 0);
 
          vkCmdEndRenderPass(cmd);
       }
