@@ -33,43 +33,43 @@ typedef struct
 bool running = true;
 
 #ifdef VK_USE_PLATFORM_XLIB_KHR
-bool handle_input(Display* display, Window window, uniforms_t* uniforms)
+bool handle_input(surface_t* surface, uniforms_t* uniforms)
 {
    XEvent e;
-   if (XCheckWindowEvent(display, window, ~0, &e) && (e.type == KeyPress))
+   if (XCheckWindowEvent(surface->display, surface->window, ~0, &e) && (e.type == KeyPress))
    {
       if(e.xkey.state & Mod1Mask)
       {
-         if(e.xkey.keycode == XKeysymToKeycode(display, XK_Left))
+         if(e.xkey.keycode == XKeysymToKeycode(surface->display, XK_Left))
             uniforms->angle += M_PI / 64;
-         if(e.xkey.keycode == XKeysymToKeycode(display, XK_Right))
+         if(e.xkey.keycode == XKeysymToKeycode(surface->display, XK_Right))
             uniforms->angle -= M_PI / 64;
       }
       else if(e.xkey.state & ControlMask)
       {
-         if(e.xkey.keycode == XKeysymToKeycode(display, XK_Left))
+         if(e.xkey.keycode == XKeysymToKeycode(surface->display, XK_Left))
             uniforms->image.width += 16.0f;
-         if(e.xkey.keycode == XKeysymToKeycode(display, XK_Right))
+         if(e.xkey.keycode == XKeysymToKeycode(surface->display, XK_Right))
             uniforms->image.width -= 16.0f;
-         if(e.xkey.keycode == XKeysymToKeycode(display, XK_Up))
+         if(e.xkey.keycode == XKeysymToKeycode(surface->display, XK_Up))
             uniforms->image.height += 16.0f;
-         if(e.xkey.keycode == XKeysymToKeycode(display, XK_Down))
+         if(e.xkey.keycode == XKeysymToKeycode(surface->display, XK_Down))
             uniforms->image.height -= 16.0f;
       }
       else
       {
-         if(e.xkey.keycode == XKeysymToKeycode(display, XK_q))
+         if(e.xkey.keycode == XKeysymToKeycode(surface->display, XK_q))
          {
             running = false;
             return false;
          }
-         if(e.xkey.keycode == XKeysymToKeycode(display, XK_Left))
+         if(e.xkey.keycode == XKeysymToKeycode(surface->display, XK_Left))
             uniforms->center.x -= 16.0f;
-         if(e.xkey.keycode == XKeysymToKeycode(display, XK_Right))
+         if(e.xkey.keycode == XKeysymToKeycode(surface->display, XK_Right))
             uniforms->center.x += 16.0f;
-         if(e.xkey.keycode == XKeysymToKeycode(display, XK_Up))
+         if(e.xkey.keycode == XKeysymToKeycode(surface->display, XK_Up))
             uniforms->center.y -= 16.0f;
-         if(e.xkey.keycode == XKeysymToKeycode(display, XK_Down))
+         if(e.xkey.keycode == XKeysymToKeycode(surface->display, XK_Down))
             uniforms->center.y += 16.0f;
       }
       return true;
@@ -85,12 +85,30 @@ int main(int argc, char **argv)
    context_t vk;
    context_init(&vk);
 
+   surface_t surface;
+   {
+      surface_init_info_t info =
+      {
+         .gpu = vk.gpu,
+         .queue_family_index = vk.queue_family_index,
+         .width = 640,
+         .height = 480
+      };
+      surface_init(vk.instance, &info, &surface);
+   }
+
    swapchain_t chain;
-#if 1
-   swapchain_init(&vk, 640, 480, VK_PRESENT_MODE_FIFO_KHR, &chain);
-#else
-   swapchain_init(&vk, 640, 480, VK_PRESENT_MODE_IMMEDIATE_KHR, &chain);
-#endif
+   {
+      swapchain_init_info_t info =
+      {
+         .surface = surface.handle,
+         .width = surface.width,
+         .height = surface.height,
+         .present_mode = VK_PRESENT_MODE_FIFO_KHR
+//         .present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR
+      };
+      swapchain_init(vk.device, &info, &chain);
+   }
 
    texture_t tex;
    {
@@ -281,7 +299,7 @@ int main(int argc, char **argv)
                    (end_time.tv_nsec - start_time.tv_nsec) / 1000000000.0f;
       frames++;
 
-      if(handle_input(chain.display, chain.window, uniforms))
+      if(handle_input(&surface, uniforms))
          memory_flush(&vk, &ubo.mem);
 
       if (diff > 0.5f)
@@ -306,6 +324,7 @@ int main(int argc, char **argv)
    buffer_free(&vk, &vbo);
    texture_free(&vk, &tex);
    swapchain_free(&vk, &chain);
+   surface_free(vk.instance, &surface);
    context_free(&vk);
 
    return 0;

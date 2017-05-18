@@ -13,6 +13,7 @@ OBJS += memory.o
 OBJS += pipeline.o
 OBJS += png_file.o
 OBJS += shaders.o
+OBJS += surface.o
 OBJS += swapchain.o
 OBJS += texture.o
 

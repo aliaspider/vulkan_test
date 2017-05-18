@@ -22,7 +22,17 @@ typedef struct
 
 typedef struct
 {
-   VkSurfaceKHR surface;
+   VkSurfaceKHR handle;
+   int width;
+   int height;
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+   Display *display;
+   Window   window;
+#endif
+}surface_t;
+
+typedef struct
+{
    VkSwapchainKHR handle;
    VkRect2D scissor;
    VkViewport viewport;
@@ -30,10 +40,6 @@ typedef struct
    uint32_t count;
    VkImageView views[MAX_SWAPCHAIN_IMAGES];
    VkFramebuffer framebuffers[MAX_SWAPCHAIN_IMAGES];
-#ifdef VK_USE_PLATFORM_XLIB_KHR
-   Display *display;
-   Window   window;
-#endif
 }swapchain_t;
 
 typedef struct
@@ -103,7 +109,24 @@ typedef struct
 void context_init(context_t* vk);
 void context_free(context_t* vk);
 
-void swapchain_init(const context_t *vk, int width, int height, VkPresentModeKHR present_mode, swapchain_t *chain);
+typedef struct
+{
+   VkPhysicalDevice gpu;
+   uint32_t queue_family_index;
+   int width;
+   int height;
+}surface_init_info_t;
+void surface_init(VkInstance instance, const surface_init_info_t* init_info, surface_t *surface);
+void surface_free(VkInstance instance, surface_t *surface);
+
+typedef struct
+{
+   VkSurfaceKHR surface;
+   int width;
+   int height;
+   VkPresentModeKHR present_mode;
+}swapchain_init_info_t;
+void swapchain_init(VkDevice device, const swapchain_init_info_t* init_info, swapchain_t *chain);
 void swapchain_free(const context_t *vk, swapchain_t *chain);
 
 void texture_init(const context_t* vk, int width, int height, texture_t* tex);
