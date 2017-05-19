@@ -3,7 +3,7 @@
 #include <string.h>
 #include "vulkan.h"
 
-void descriptors_init(const context_t *vk, const buffer_t *ubo, const texture_t *tex, descriptor_t* desc)
+void descriptors_init(VkDevice device, const descriptors_init_info_t *init_info, descriptor_t* desc)
 {
    {
       const VkDescriptorPoolSize sizes[] =
@@ -18,7 +18,7 @@ void descriptors_init(const context_t *vk, const buffer_t *ubo, const texture_t 
          .maxSets = 1,
          .poolSizeCount = countof(sizes), sizes
       };
-      vkCreateDescriptorPool(vk->device, &info, NULL, &desc->pool);
+      vkCreateDescriptorPool(device, &info, NULL, &desc->pool);
    }
 
    {
@@ -47,7 +47,7 @@ void descriptors_init(const context_t *vk, const buffer_t *ubo, const texture_t 
 
          }
       };
-      vkCreateDescriptorSetLayout(vk->device, &info[0], NULL, &desc->set_layout);
+      vkCreateDescriptorSetLayout(device, &info[0], NULL, &desc->set_layout);
    }
 
    {
@@ -57,20 +57,20 @@ void descriptors_init(const context_t *vk, const buffer_t *ubo, const texture_t 
          .descriptorPool = desc->pool,
          .descriptorSetCount = 1, &desc->set_layout
       };
-      vkAllocateDescriptorSets(vk->device, &info, &desc->set);
+      vkAllocateDescriptorSets(device, &info, &desc->set);
    }
 
    {
       const VkDescriptorBufferInfo buffer_info =
       {
-         .buffer = ubo->handle,
+         .buffer = init_info->ubo_buffer,
          .offset = 0,
-         .range = ubo->size
+         .range = init_info->ubo_range
       };
       const VkDescriptorImageInfo image_info =
       {
-         .sampler = tex->sampler,
-         .imageView = tex->view,
+         .sampler = init_info->sampler,
+         .imageView = init_info->image_view,
          .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
       };
 
@@ -95,7 +95,7 @@ void descriptors_init(const context_t *vk, const buffer_t *ubo, const texture_t 
             .pImageInfo = &image_info
          }
       };
-      vkUpdateDescriptorSets(vk->device, countof(write_set), write_set, 0, NULL);
+      vkUpdateDescriptorSets(device, countof(write_set), write_set, 0, NULL);
    }
 }
 

@@ -180,7 +180,16 @@ int main(int argc, char **argv)
    }
 
    descriptor_t desc;
-   descriptors_init(&vk, &ubo, &tex, &desc);
+   {
+      descriptors_init_info_t info =
+      {
+         .ubo_buffer = ubo.handle,
+         .ubo_range = ubo.size,
+         .sampler = tex.sampler,
+         .image_view = tex.view,
+      };
+      descriptors_init(vk.device, &info, &desc);
+   }
 
    pipeline_t pipe;
    {

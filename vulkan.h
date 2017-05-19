@@ -155,7 +155,14 @@ typedef struct
 void uniform_buffer_init(VkDevice device, const uniform_buffer_init_info_t* init_info, buffer_t *ubo);
 void buffer_free(const context_t *vk, buffer_t *buffer);
 
-void descriptors_init(const context_t* vk, const buffer_t* ubo, const texture_t* tex, descriptor_t* desc);
+typedef struct
+{
+   VkBuffer ubo_buffer;
+   VkDeviceSize ubo_range;
+   VkSampler sampler;
+   VkImageView image_view;
+}descriptors_init_info_t;
+void descriptors_init(VkDevice device, const descriptors_init_info_t* init_info, descriptor_t* desc);
 void descriptors_free(const context_t* vk, descriptor_t* desc);
 
 void shaders_init(const context_t* vk, size_t vs_code_size, const uint32_t* vs_code, size_t fs_code_size, const uint32_t* fs_code, shaders_t *shaders);
