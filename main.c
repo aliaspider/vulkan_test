@@ -88,15 +88,15 @@ int main(int argc, char **argv)
    physical_device_t gpu;
    physical_device_init(instance.handle, &gpu);
 
-   device_t device;
-   device_init(gpu.handle, &device);
+   device_t dev;
+   device_init(gpu.handle, &dev);
 
    surface_t surface;
    {
       surface_init_info_t info =
       {
          .gpu = gpu.handle,
-         .queue_family_index = device.queue_family_index,
+         .queue_family_index = dev.queue_family_index,
          .width = 640,
          .height = 480
       };
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
          .present_mode = VK_PRESENT_MODE_FIFO_KHR
 //         .present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR
       };
-      swapchain_init(device.handle, &info, &chain);
+      swapchain_init(dev.handle, &info, &chain);
    }
 
    texture_t tex;
@@ -124,16 +124,16 @@ int main(int argc, char **argv)
       {
          texture_init_info_t info =
          {
-            .queue_family_index = device.queue_family_index,
+            .queue_family_index = dev.queue_family_index,
             .width = png.width,
             .height = png.height,
          };
-         texture_init(device.handle, gpu.mem.memoryTypes, &info, &tex);
+         texture_init(dev.handle, gpu.memoryTypes, &info, &tex);
       }
 
       /* texture updates are written to the stating texture then uploaded later */
       png_file_read(&png, tex.staging.mem.u8 + tex.staging.mem_layout.offset, tex.staging.mem_layout.rowPitch);
-      device_memory_flush(device.handle, &tex.staging.mem);
+      device_memory_flush(dev.handle, &tex.staging.mem);
       tex.dirty = true;
 
       png_file_free(&png);
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
          .size = sizeof(vertices),
          .data = vertices,
       };
-      buffer_init(device.handle, gpu.mem.memoryTypes, &info, &vbo);
+      buffer_init(dev.handle, gpu.memoryTypes, &info, &vbo);
    }
 
    buffer_t  ubo;
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
          .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
          .size = sizeof(uniforms_t),
       };
-      buffer_init(device.handle, gpu.mem.memoryTypes, &info, &ubo);
+      buffer_init(dev.handle, gpu.memoryTypes, &info, &ubo);
    }
 
    descriptor_t desc;
@@ -193,7 +193,7 @@ int main(int argc, char **argv)
          .sampler = tex.sampler,
          .image_view = tex.view,
       };
-      descriptors_init(device.handle, &info, &desc);
+      descriptors_init(dev.handle, &info, &desc);
    }
 
    pipeline_t pipe;
@@ -209,7 +209,7 @@ int main(int argc, char **argv)
             .codeSize = sizeof(code),
             .pCode = code
          };
-         vkCreateShaderModule(device.handle, &info, NULL, &vertex_shader);
+         vkCreateShaderModule(dev.handle, &info, NULL, &vertex_shader);
       }
       
       VkShaderModule fragment_shader;
@@ -223,7 +223,7 @@ int main(int argc, char **argv)
             .codeSize = sizeof(code),
             .pCode = code
          };
-         vkCreateShaderModule(device.handle, &info, NULL, &fragment_shader);
+         vkCreateShaderModule(dev.handle, &info, NULL, &fragment_shader);
       }
       
       const VkVertexInputAttributeDescription attrib_desc[] =
@@ -246,11 +246,11 @@ int main(int argc, char **argv)
             .viewport = &chain.viewport,
             .renderpass = chain.renderpass,
          };
-         pipeline_init(device.handle, &info, &pipe);
+         pipeline_init(dev.handle, &info, &pipe);
       }
 
-      vkDestroyShaderModule(device.handle, vertex_shader, NULL);
-      vkDestroyShaderModule(device.handle, fragment_shader, NULL);
+      vkDestroyShaderModule(dev.handle, vertex_shader, NULL);
+      vkDestroyShaderModule(dev.handle, fragment_shader, NULL);
    }
 
    VkCommandBuffer cmd;
@@ -258,11 +258,11 @@ int main(int argc, char **argv)
       const VkCommandBufferAllocateInfo info =
       {
          VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-         .commandPool = device.cmd_pool,
+         .commandPool = dev.cmd_pool,
          .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
          .commandBufferCount = 1
       };
-      vkAllocateCommandBuffers(device.handle, &info, &cmd);
+      vkAllocateCommandBuffers(dev.handle, &info, &cmd);
    }
 
    VkFence queue_fence;
@@ -273,8 +273,8 @@ int main(int argc, char **argv)
          VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
          .flags = VK_FENCE_CREATE_SIGNALED_BIT
       };
-      vkCreateFence(device.handle, &info, NULL, &chain_fence);
-      vkCreateFence(device.handle, &info, NULL, &queue_fence);
+      vkCreateFence(dev.handle, &info, NULL, &chain_fence);
+      vkCreateFence(dev.handle, &info, NULL, &queue_fence);
    }
 
    int frames = 0;
@@ -293,12 +293,12 @@ int main(int argc, char **argv)
    while (running)
    {
       uint32_t image_index;
-      vkWaitForFences(device.handle, 1, &chain_fence, VK_TRUE, -1);
-      vkResetFences(device.handle, 1, &chain_fence);
-      vkAcquireNextImageKHR(device.handle, chain.handle, UINT64_MAX, NULL, chain_fence, &image_index);
+      vkWaitForFences(dev.handle, 1, &chain_fence, VK_TRUE, -1);
+      vkResetFences(dev.handle, 1, &chain_fence);
+      vkAcquireNextImageKHR(dev.handle, chain.handle, UINT64_MAX, NULL, chain_fence, &image_index);
 
-      vkWaitForFences(device.handle, 1, &queue_fence, VK_TRUE, -1);
-      vkResetFences(device.handle, 1, &queue_fence);
+      vkWaitForFences(dev.handle, 1, &queue_fence, VK_TRUE, -1);
+      vkResetFences(dev.handle, 1, &queue_fence);
 
       {
          const VkCommandBufferBeginInfo info =
@@ -349,7 +349,7 @@ int main(int argc, char **argv)
             .commandBufferCount = 1,
             .pCommandBuffers = &cmd
          };
-         vkQueueSubmit(device.queue, 1, &info, queue_fence);
+         vkQueueSubmit(dev.queue, 1, &info, queue_fence);
       }
 
       {
@@ -360,7 +360,7 @@ int main(int argc, char **argv)
             .pSwapchains = &chain.handle,
             .pImageIndices = &image_index
          };
-         vkQueuePresentKHR(device.queue, &info);
+         vkQueuePresentKHR(dev.queue, &info);
       }
 
       struct timespec end_time;
@@ -370,7 +370,7 @@ int main(int argc, char **argv)
       frames++;
 
       if(handle_input(&surface, uniforms))
-         device_memory_flush(device.handle, &ubo.mem);
+         device_memory_flush(dev.handle, &ubo.mem);
 
       if (diff > 0.5f)
       {
@@ -382,20 +382,20 @@ int main(int argc, char **argv)
    }   
    printf("\n");
 
-   vkWaitForFences(device.handle, 1, &queue_fence, VK_TRUE, UINT64_MAX);
-   vkDestroyFence(device.handle, queue_fence, NULL);
+   vkWaitForFences(dev.handle, 1, &queue_fence, VK_TRUE, UINT64_MAX);
+   vkDestroyFence(dev.handle, queue_fence, NULL);
 
-   vkWaitForFences(device.handle, 1, &chain_fence, VK_TRUE, UINT64_MAX);
-   vkDestroyFence(device.handle, chain_fence, NULL);
+   vkWaitForFences(dev.handle, 1, &chain_fence, VK_TRUE, UINT64_MAX);
+   vkDestroyFence(dev.handle, chain_fence, NULL);
 
-   pipeline_free(device.handle, &pipe);
-   descriptors_free(device.handle, &desc);
-   buffer_free(device.handle, &ubo);
-   buffer_free(device.handle, &vbo);
-   texture_free(device.handle, &tex);
-   swapchain_free(device.handle, &chain);
+   pipeline_free(dev.handle, &pipe);
+   descriptors_free(dev.handle, &desc);
+   buffer_free(dev.handle, &ubo);
+   buffer_free(dev.handle, &vbo);
+   texture_free(dev.handle, &tex);
+   swapchain_free(dev.handle, &chain);
    surface_free(instance.handle, &surface);
-   device_free(&device);
+   device_free(&dev);
    physical_device_free(&gpu);
    instance_free(&instance);
 

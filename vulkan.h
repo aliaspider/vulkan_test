@@ -19,7 +19,17 @@ void instance_free(instance_t* context);
 typedef struct
 {
    VkPhysicalDevice handle;
-   VkPhysicalDeviceMemoryProperties mem;
+   union
+   {
+      struct
+      {
+         uint32_t        memoryTypeCount;
+         VkMemoryType    memoryTypes[VK_MAX_MEMORY_TYPES];
+         uint32_t        memoryHeapCount;
+         VkMemoryHeap    memoryHeaps[VK_MAX_MEMORY_HEAPS];
+      };
+      VkPhysicalDeviceMemoryProperties mem;
+   };
 }physical_device_t;
 void physical_device_init(VkInstance instance, physical_device_t* dst);
 void physical_device_free(physical_device_t* gpu);
