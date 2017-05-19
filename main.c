@@ -170,7 +170,14 @@ int main(int argc, char **argv)
    }
 
    buffer_t  ubo;
-   uniform_buffer_init(&vk, sizeof(uniforms_t), &ubo);
+   {
+      uniform_buffer_init_info_t info =
+      {
+         .size = sizeof(uniforms_t),
+         .memory_types = vk.mem.memoryTypes
+      };
+      uniform_buffer_init(vk.device, &info, &ubo);
+   }
 
    descriptor_t desc;
    descriptors_init(&vk, &ubo, &tex, &desc);

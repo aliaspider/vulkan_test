@@ -136,7 +136,7 @@ typedef struct
    const VkMemoryType* memory_types;
    uint32_t queue_family_index;
 }texture_init_info_t;
-void texture_init(VkDevice device, texture_init_info_t *init_info, texture_t* tex);
+void texture_init(VkDevice device, const texture_init_info_t *init_info, texture_t* tex);
 void texture_free(const context_t* vk, texture_t* tex);
 void texture_update(VkCommandBuffer cmd, texture_t* tex);
 
@@ -146,8 +146,13 @@ typedef struct
    const void* data;
    const VkMemoryType* memory_types;
 }vertex_buffer_init_info_t;
-void vertex_buffer_init(VkDevice device, vertex_buffer_init_info_t *init_info, buffer_t *vbo);
-void uniform_buffer_init(const context_t *vk, uint32_t size, buffer_t *ubo);
+void vertex_buffer_init(VkDevice device, const vertex_buffer_init_info_t *init_info, buffer_t *vbo);
+typedef struct
+{
+   uint32_t size;
+   const VkMemoryType* memory_types;
+}uniform_buffer_init_info_t;
+void uniform_buffer_init(VkDevice device, const uniform_buffer_init_info_t* init_info, buffer_t *ubo);
 void buffer_free(const context_t *vk, buffer_t *buffer);
 
 void descriptors_init(const context_t* vk, const buffer_t* ubo, const texture_t* tex, descriptor_t* desc);

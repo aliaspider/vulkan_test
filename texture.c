@@ -1,7 +1,7 @@
 
 #include "vulkan.h"
 
-void texture_init(VkDevice device, texture_init_info_t* init_info, texture_t* tex)
+void texture_init(VkDevice device, const texture_init_info_t *init_info, texture_t* tex)
 {
    tex->width = init_info->width;
    tex->height = init_info->height;
