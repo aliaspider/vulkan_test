@@ -6,8 +6,9 @@ DEBUG = 1
 OBJS :=
 
 OBJS += buffer.o
-OBJS += context.o
 OBJS += descriptors.o
+OBJS += device.o
+OBJS += instance.o
 OBJS += main.o
 OBJS += memory.o
 OBJS += pipeline.o

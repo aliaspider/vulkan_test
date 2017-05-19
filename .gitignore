@@ -1,3 +1,4 @@
 *.o
 *.inc
 vulkan_test*
+*.autosave

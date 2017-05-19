@@ -10,18 +10,30 @@
 
 typedef struct
 {
-   VkInstance instance;
+   VkInstance handle;
    VkDebugReportCallbackEXT debug_cb;
-   VkPhysicalDevice gpu;
+}instance_t;
+void instance_init(instance_t* dst);
+void instance_free(instance_t* context);
+
+typedef struct
+{
+   VkPhysicalDevice handle;
    VkPhysicalDeviceMemoryProperties mem;
-   VkDevice device;
+}physical_device_t;
+void physical_device_init(VkInstance instance, physical_device_t* dst);
+void physical_device_free(physical_device_t* gpu);
+
+typedef struct
+{
+   VkDevice handle;
    uint32_t queue_family_index;
    VkQueue queue;
    VkCommandPool cmd_pool;
-}context_t;
+}device_t;
+void device_init(VkPhysicalDevice gpu, device_t* dst);
+void device_free(device_t* device);
 
-void context_init(context_t* dst);
-void context_free(context_t* context);
 
 typedef struct
 {
