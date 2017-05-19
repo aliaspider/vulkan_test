@@ -96,12 +96,6 @@ typedef struct
 
 typedef struct
 {
-   VkShaderModule vs;
-   VkShaderModule fs;
-}shaders_t;
-
-typedef struct
-{
    VkPipeline handle;
    VkPipelineLayout layout;
 }pipeline_t;
@@ -165,12 +159,19 @@ typedef struct
 void descriptors_init(VkDevice device, const descriptors_init_info_t* init_info, descriptor_t* desc);
 void descriptors_free(const context_t* vk, descriptor_t* desc);
 
-void shaders_init(const context_t* vk, size_t vs_code_size, const uint32_t* vs_code, size_t fs_code_size, const uint32_t* fs_code, shaders_t *shaders);
-void shaders_free(const context_t* vk, shaders_t *shaders);
-
-void pipeline_init(const context_t* vk, const shaders_t *shaders,
-                   int vertex_size, int attrib_count, const VkVertexInputAttributeDescription* attrib_desc,
-                   const swapchain_t* chain, const descriptor_t* desc, pipeline_t* pipe);
+typedef struct
+{
+   VkShaderModule vertex_shader;
+   VkShaderModule fragment_shader;
+   int vertex_size;
+   int attrib_count;
+   const VkVertexInputAttributeDescription* attrib_desc;
+   VkDescriptorSetLayout set_layout;
+   const VkRect2D* scissor;
+   const VkViewport* viewport;
+   VkRenderPass renderpass;
+}pipeline_init_info_t;
+void pipeline_init(VkDevice device, pipeline_init_info_t* init_info, pipeline_t* pipe);
 void pipeline_free(const context_t* vk, pipeline_t* pipe);
 
 void buffer_memory_init(VkDevice device, const VkMemoryType* memory_types, VkBuffer buffer, VkMemoryPropertyFlags req_flags, device_memory_t* mem);

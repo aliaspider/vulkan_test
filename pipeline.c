@@ -1,9 +1,7 @@
 
 #include "vulkan.h"
 
-void pipeline_init(const context_t* vk, const shaders_t *shaders,
-                   int vertex_size, int attrib_count, const VkVertexInputAttributeDescription* attrib_desc,
-                   const swapchain_t* chain, const descriptor_t* desc, pipeline_t* pipe)
+void pipeline_init(VkDevice device, pipeline_init_info_t* init_info, pipeline_t* pipe)
 {
    {
 #if 0
@@ -19,13 +17,13 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
       const VkPipelineLayoutCreateInfo info =
       {
          VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-         .setLayoutCount = 1, &desc->set_layout,
+         .setLayoutCount = 1, &init_info->set_layout,
 #if 0
          .pushConstantRangeCount = countof(ranges), ranges
 #endif
       };
 
-      vkCreatePipelineLayout(vk->device, &info, NULL, &pipe->layout);
+      vkCreatePipelineLayout(device, &info, NULL, &pipe->layout);
    }
 
    {
@@ -35,26 +33,26 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
             VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
             .stage = VK_SHADER_STAGE_VERTEX_BIT,
             .pName = "main",
-            .module = shaders->vs
+            .module = init_info->vertex_shader
          },
          {
             VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
             .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
             .pName = "main",
-            .module = shaders->fs
+            .module = init_info->fragment_shader
          }
       };
 
       const VkVertexInputBindingDescription vertex_description =
       {
-         0, vertex_size, VK_VERTEX_INPUT_RATE_VERTEX
+         0, init_info->vertex_size, VK_VERTEX_INPUT_RATE_VERTEX
       };
 
       const VkPipelineVertexInputStateCreateInfo vertex_input_state =
       {
          VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
          .vertexBindingDescriptionCount = 1, &vertex_description,
-         .vertexAttributeDescriptionCount = attrib_count, attrib_desc
+         .vertexAttributeDescriptionCount = init_info->attrib_count, init_info->attrib_desc
       };
 
       const VkPipelineInputAssemblyStateCreateInfo input_assembly_state =
@@ -67,8 +65,8 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
       const VkPipelineViewportStateCreateInfo viewport_state =
       {
          VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-         .viewportCount = 1, &chain->viewport,
-         .scissorCount = 1, &chain->scissor
+         .viewportCount = 1, init_info->viewport,
+         .scissorCount = 1, init_info->scissor
       };
 
       const VkPipelineRasterizationStateCreateInfo rasterization_info =
@@ -108,10 +106,10 @@ void pipeline_init(const context_t* vk, const shaders_t *shaders,
          .pMultisampleState = &multisample_state,
          .pColorBlendState = &colorblend_state,
          .layout = pipe->layout,
-         .renderPass = chain->renderpass,
+         .renderPass = init_info->renderpass,
          .subpass = 0
       };
-      vkCreateGraphicsPipelines(vk->device, VK_NULL_HANDLE, 1, &info, NULL, &pipe->handle);
+      vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &info, NULL, &pipe->handle);
    }
 }
 

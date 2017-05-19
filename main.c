@@ -193,16 +193,34 @@ int main(int argc, char **argv)
 
    pipeline_t pipe;
    {
-      static const uint32_t vs_code [] =
-      #include "main.vert.inc"
-      ;
-      static const uint32_t fs_code [] =
-      #include "main.frag.inc"
-      ;
-
-      shaders_t shaders;
-      shaders_init(&vk, sizeof(vs_code), vs_code, sizeof(fs_code), fs_code, &shaders);
-
+      VkShaderModule vertex_shader;
+      {
+         static const uint32_t code [] =
+         #include "main.vert.inc"
+         ;
+         const VkShaderModuleCreateInfo info =
+         {
+            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+            .codeSize = sizeof(code),
+            .pCode = code
+         };
+         vkCreateShaderModule(vk.device, &info, NULL, &vertex_shader);
+      }
+      
+      VkShaderModule fragment_shader;
+      {
+         static const uint32_t code [] =
+         #include "main.frag.inc"
+         ;
+         const VkShaderModuleCreateInfo info =
+         {
+            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+            .codeSize = sizeof(code),
+            .pCode = code
+         };
+         vkCreateShaderModule(vk.device, &info, NULL, &fragment_shader);
+      }
+      
       const VkVertexInputAttributeDescription attrib_desc[] =
       {
          {0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(vertex_t, position)},
@@ -210,9 +228,24 @@ int main(int argc, char **argv)
          {2, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(vertex_t, color)}
       };
 
-      pipeline_init(&vk, &shaders, sizeof(vertex_t), countof(attrib_desc), attrib_desc, &chain, &desc, &pipe);
+      {
+         pipeline_init_info_t info =
+         {
+            .vertex_shader = vertex_shader,
+            .fragment_shader = fragment_shader,
+            .vertex_size = sizeof(vertex_t),
+            .attrib_count = countof(attrib_desc),
+            .attrib_desc = attrib_desc,
+            .set_layout = desc.set_layout,
+            .scissor = &chain.scissor,
+            .viewport = &chain.viewport,
+            .renderpass = chain.renderpass,
+         };
+         pipeline_init(vk.device, &info, &pipe);
+      }
 
-      shaders_free(&vk, &shaders);
+      vkDestroyShaderModule(vk.device, vertex_shader, NULL);
+      vkDestroyShaderModule(vk.device, fragment_shader, NULL);
    }
 
    VkCommandBuffer cmd;
