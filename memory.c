@@ -68,7 +68,7 @@ void image_memory_init(VkDevice device, const VkMemoryType* memory_types, VkImag
    vkBindImageMemory(device, image, mem->handle, 0);
 }
 
-void memory_flush(const context_t* vk, const device_memory_t* mem)
+void memory_flush(VkDevice device, const device_memory_t* mem)
 {
    if(mem->flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
       return;
@@ -80,5 +80,5 @@ void memory_flush(const context_t* vk, const device_memory_t* mem)
       .offset = 0,
       .size = mem->size
    };
-   vkFlushMappedMemoryRanges(vk->device, 1, &mappedUniformsMemoryRange);
+   vkFlushMappedMemoryRanges(device, 1, &mappedUniformsMemoryRange);
 }

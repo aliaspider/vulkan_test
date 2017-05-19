@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 
       /* texture updates are written to the stating texture then uploaded later */
       png_file_read(&png, tex.staging.mem.u8 + tex.staging.mem_layout.offset, tex.staging.mem_layout.rowPitch);
-      memory_flush(&vk, &tex.staging.mem);
+      memory_flush(vk.device, &tex.staging.mem);
       tex.dirty = true;
 
       png_file_free(&png);
@@ -159,7 +159,14 @@ int main(int argc, char **argv)
          {{ 1.0f,  1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
          {{-1.0f,  1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}}
       };
-      vertex_buffer_init(&vk, sizeof(vertices), vertices, &vbo);
+
+      vertex_buffer_init_info_t info =
+      {
+         .size = sizeof(vertices),
+         .data = vertices,
+         .memory_types = vk.mem.memoryTypes
+      };
+      vertex_buffer_init(vk.device, &info, &vbo);
    }
 
    buffer_t  ubo;
@@ -309,7 +316,7 @@ int main(int argc, char **argv)
       frames++;
 
       if(handle_input(&surface, uniforms))
-         memory_flush(&vk, &ubo.mem);
+         memory_flush(vk.device, &ubo.mem);
 
       if (diff > 0.5f)
       {

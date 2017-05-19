@@ -140,7 +140,13 @@ void texture_init(VkDevice device, texture_init_info_t *init_info, texture_t* te
 void texture_free(const context_t* vk, texture_t* tex);
 void texture_update(VkCommandBuffer cmd, texture_t* tex);
 
-void vertex_buffer_init(const context_t *vk, uint32_t size, const void* data, buffer_t *vbo);
+typedef struct
+{
+   uint32_t size;
+   const void* data;
+   const VkMemoryType* memory_types;
+}vertex_buffer_init_info_t;
+void vertex_buffer_init(VkDevice device, vertex_buffer_init_info_t *init_info, buffer_t *vbo);
 void uniform_buffer_init(const context_t *vk, uint32_t size, buffer_t *ubo);
 void buffer_free(const context_t *vk, buffer_t *buffer);
 
@@ -158,4 +164,4 @@ void pipeline_free(const context_t* vk, pipeline_t* pipe);
 void buffer_memory_init(VkDevice device, const VkMemoryType* memory_types, VkBuffer buffer, VkMemoryPropertyFlags req_flags, device_memory_t* mem);
 void image_memory_init(VkDevice device, const VkMemoryType* memory_types, VkImage image, VkMemoryPropertyFlags req_flags, device_memory_t* mem);
 void memory_free(const context_t* vk, device_memory_t* mem);
-void memory_flush(const context_t* vk, const device_memory_t* mem);
+void memory_flush(VkDevice device, const device_memory_t* mem);

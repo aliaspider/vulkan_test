@@ -19,26 +19,26 @@ void uniform_buffer_init(const context_t *vk, uint32_t size, buffer_t* ubo)
    buffer_memory_init(vk->device, vk->mem.memoryTypes, ubo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &ubo->mem);
 }
 
-void vertex_buffer_init(const context_t *vk, uint32_t size, const void *data, buffer_t* vbo)
+void vertex_buffer_init(VkDevice device, vertex_buffer_init_info_t* init_info, buffer_t *vbo)
 {
-   vbo->size = size;
+   vbo->size = init_info->size;
 
    {
       const VkBufferCreateInfo info =
       {
          VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, NULL, 0,
-         size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+         vbo->size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
          VK_SHARING_MODE_EXCLUSIVE, 0, NULL
       };
-      vkCreateBuffer(vk->device, &info, NULL, &vbo->handle);
+      vkCreateBuffer(device, &info, NULL, &vbo->handle);
    }
 
-   buffer_memory_init(vk->device, vk->mem.memoryTypes, vbo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &vbo->mem);
+   buffer_memory_init(device, init_info->memory_types, vbo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &vbo->mem);
 
-   memcpy(vbo->mem.ptr, data, size);
-   memory_flush(vk, &vbo->mem);
+   memcpy(vbo->mem.ptr, init_info->data, init_info->size);
+   memory_flush(device, &vbo->mem);
 
-   vkUnmapMemory(vk->device, vbo->mem.handle);
+   vkUnmapMemory(device, vbo->mem.handle);
    vbo->mem.ptr = NULL;
 }
 
