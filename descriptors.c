@@ -3,7 +3,7 @@
 #include <string.h>
 #include "vulkan.h"
 
-void descriptors_init(VkDevice device, const descriptors_init_info_t *init_info, descriptor_t* desc)
+void descriptors_init(VkDevice device, const descriptors_init_info_t *init_info, descriptor_t* dst)
 {
    {
       const VkDescriptorPoolSize sizes[] =
@@ -18,7 +18,7 @@ void descriptors_init(VkDevice device, const descriptors_init_info_t *init_info,
          .maxSets = 1,
          .poolSizeCount = countof(sizes), sizes
       };
-      vkCreateDescriptorPool(device, &info, NULL, &desc->pool);
+      vkCreateDescriptorPool(device, &info, NULL, &dst->pool);
    }
 
    {
@@ -47,17 +47,17 @@ void descriptors_init(VkDevice device, const descriptors_init_info_t *init_info,
 
          }
       };
-      vkCreateDescriptorSetLayout(device, &info[0], NULL, &desc->set_layout);
+      vkCreateDescriptorSetLayout(device, &info[0], NULL, &dst->set_layout);
    }
 
    {
       const VkDescriptorSetAllocateInfo info =
       {
          VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-         .descriptorPool = desc->pool,
-         .descriptorSetCount = 1, &desc->set_layout
+         .descriptorPool = dst->pool,
+         .descriptorSetCount = 1, &dst->set_layout
       };
-      vkAllocateDescriptorSets(device, &info, &desc->set);
+      vkAllocateDescriptorSets(device, &info, &dst->set);
    }
 
    {
@@ -78,7 +78,7 @@ void descriptors_init(VkDevice device, const descriptors_init_info_t *init_info,
       {
          {
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = desc->set,
+            .dstSet = dst->set,
             .dstBinding = 0,
             .dstArrayElement = 0,
             .descriptorCount = 1,
@@ -87,7 +87,7 @@ void descriptors_init(VkDevice device, const descriptors_init_info_t *init_info,
          },
          {
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = desc->set,
+            .dstSet = dst->set,
             .dstBinding = 1,
             .dstArrayElement = 0,
             .descriptorCount = 1,
@@ -99,10 +99,10 @@ void descriptors_init(VkDevice device, const descriptors_init_info_t *init_info,
    }
 }
 
-void descriptors_free(VkDevice device, descriptor_t *desc)
+void descriptors_free(VkDevice device, descriptor_t *descriptor)
 {
-   vkDestroyDescriptorPool(device, desc->pool, NULL);
-   vkDestroyDescriptorSetLayout(device, desc->set_layout, NULL);
-   desc->pool = VK_NULL_HANDLE;
-   desc->set_layout = VK_NULL_HANDLE;
+   vkDestroyDescriptorPool(device, descriptor->pool, NULL);
+   vkDestroyDescriptorSetLayout(device, descriptor->set_layout, NULL);
+   descriptor->pool = VK_NULL_HANDLE;
+   descriptor->set_layout = VK_NULL_HANDLE;
 }

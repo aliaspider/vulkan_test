@@ -1,7 +1,7 @@
 
 #include "vulkan.h"
 
-void swapchain_init(VkDevice device, const swapchain_init_info_t *init_info, swapchain_t* chain)
+void swapchain_init(VkDevice device, const swapchain_init_info_t *init_info, swapchain_t* dst)
 {
    VkSwapchainCreateInfoKHR swapchainCreateInfo =
    {
@@ -20,7 +20,7 @@ void swapchain_init(VkDevice device, const swapchain_init_info_t *init_info, swa
       .presentMode = init_info->present_mode,
       .clipped = VK_TRUE
    };
-   vkCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &chain->handle);
+   vkCreateSwapchainKHR(device, &swapchainCreateInfo, NULL, &dst->handle);
 
    /* init renderpass */
    VkAttachmentDescription attachmentDescriptions[] =
@@ -50,19 +50,19 @@ void swapchain_init(VkDevice device, const swapchain_init_info_t *init_info, swa
       .subpassCount = countof(subpassDescriptions), subpassDescriptions,
    };
 
-   vkCreateRenderPass(device, &renderPassCreateInfo, NULL, &chain->renderpass);
+   vkCreateRenderPass(device, &renderPassCreateInfo, NULL, &dst->renderpass);
 
    /* init image views and framebuffers */
-   vkGetSwapchainImagesKHR(device, chain->handle, &chain->count, NULL);
-   if(chain->count > MAX_SWAPCHAIN_IMAGES)
-      chain->count = MAX_SWAPCHAIN_IMAGES;
+   vkGetSwapchainImagesKHR(device, dst->handle, &dst->count, NULL);
+   if(dst->count > MAX_SWAPCHAIN_IMAGES)
+      dst->count = MAX_SWAPCHAIN_IMAGES;
 
-   VkImage swapchainImages[chain->count];
-   vkGetSwapchainImagesKHR(device, chain->handle, &chain->count, swapchainImages);
+   VkImage swapchainImages[dst->count];
+   vkGetSwapchainImagesKHR(device, dst->handle, &dst->count, swapchainImages);
 
 
    int i;
-   for (i = 0; i < chain->count; i++)
+   for (i = 0; i < dst->count; i++)
    {
       {
          VkImageViewCreateInfo info =
@@ -75,34 +75,34 @@ void swapchain_init(VkDevice device, const swapchain_init_info_t *init_info, swa
             .subresourceRange.levelCount = 1,
             .subresourceRange.layerCount = 1
          };
-         vkCreateImageView(device, &info, NULL, &chain->views[i]);
+         vkCreateImageView(device, &info, NULL, &dst->views[i]);
       }
 
       {
          VkFramebufferCreateInfo info =
          {
             VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-            .renderPass = chain->renderpass,
-            .attachmentCount = 1, &chain->views[i],
+            .renderPass = dst->renderpass,
+            .attachmentCount = 1, &dst->views[i],
             .width = init_info->width,
             .height = init_info->height,
             .layers = 1
          };
-         vkCreateFramebuffer(device, &info, NULL, &chain->framebuffers[i]);
+         vkCreateFramebuffer(device, &info, NULL, &dst->framebuffers[i]);
       }
    }
 
-   chain->viewport.x = 0.0f;
-   chain->viewport.y = 0.0f;
-   chain->viewport.width = init_info->width;
-   chain->viewport.height = init_info->height;
-   chain->viewport.minDepth = -1.0f;
-   chain->viewport.maxDepth =  1.0f;
+   dst->viewport.x = 0.0f;
+   dst->viewport.y = 0.0f;
+   dst->viewport.width = init_info->width;
+   dst->viewport.height = init_info->height;
+   dst->viewport.minDepth = -1.0f;
+   dst->viewport.maxDepth =  1.0f;
 
-   chain->scissor.offset.x = 0.0f;
-   chain->scissor.offset.y = 0.0f;
-   chain->scissor.extent.width = init_info->width;
-   chain->scissor.extent.height = init_info->height;
+   dst->scissor.offset.x = 0.0f;
+   dst->scissor.offset.y = 0.0f;
+   dst->scissor.extent.width = init_info->width;
+   dst->scissor.extent.height = init_info->height;
 }
 
 void swapchain_free(VkDevice device, swapchain_t *chain)

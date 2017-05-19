@@ -1,7 +1,7 @@
 
 #include "vulkan.h"
 
-void memory_init(VkDevice device, const memory_init_info_t* init_info, device_memory_t* mem)
+void memory_init(VkDevice device, const memory_init_info_t* init_info, device_memory_t* dst)
 {
 
    VkMemoryRequirements reqs;
@@ -11,8 +11,8 @@ void memory_init(VkDevice device, const memory_init_info_t* init_info, device_me
    else
       vkGetImageMemoryRequirements(device, init_info->image, &reqs);
 
-   mem->size = reqs.size;
-   mem->alignment = reqs.alignment;
+   dst->size = reqs.size;
+   dst->alignment = reqs.alignment;
 
    const VkMemoryType* type = init_info->memory_types;
    {
@@ -27,53 +27,53 @@ void memory_init(VkDevice device, const memory_init_info_t* init_info, device_me
       }
    }
 
-   mem->flags = type->propertyFlags;
+   dst->flags = type->propertyFlags;
 
    {
       const VkMemoryAllocateInfo info =
       {
          VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-         .allocationSize = mem->size,
+         .allocationSize = dst->size,
          .memoryTypeIndex = type - init_info->memory_types
       };
-      vkAllocateMemory(device, &info, NULL, &mem->handle);
+      vkAllocateMemory(device, &info, NULL, &dst->handle);
    }
 
    if(init_info->req_flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-      vkMapMemory(device, mem->handle, 0, mem->size, 0, &mem->ptr);
+      vkMapMemory(device, dst->handle, 0, dst->size, 0, &dst->ptr);
    else
-      mem->ptr = NULL;
+      dst->ptr = NULL;
 
    if(init_info->buffer)
-      vkBindBufferMemory(device, init_info->buffer, mem->handle, 0);
+      vkBindBufferMemory(device, init_info->buffer, dst->handle, 0);
    else
-      vkBindImageMemory(device, init_info->image, mem->handle, 0);
+      vkBindImageMemory(device, init_info->image, dst->handle, 0);
 }
 
-void memory_free(VkDevice device, device_memory_t* mem)
+void memory_free(VkDevice device, device_memory_t* memory)
 {
-   if(mem->ptr)
-      vkUnmapMemory(device, mem->handle);
+   if(memory->ptr)
+      vkUnmapMemory(device, memory->handle);
 
-   vkFreeMemory(device, mem->handle, NULL);
+   vkFreeMemory(device, memory->handle, NULL);
 
-   mem->ptr = NULL;
-   mem->flags = 0;
-   mem->handle = VK_NULL_HANDLE;
+   memory->ptr = NULL;
+   memory->flags = 0;
+   memory->handle = VK_NULL_HANDLE;
 }
 
-void memory_flush(VkDevice device, const device_memory_t* mem)
+void memory_flush(VkDevice device, const device_memory_t* memory)
 {
-   if(mem->flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+   if(memory->flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
       return;
 
    {
       VkMappedMemoryRange range =
       {
          VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
-         .memory = mem->handle,
+         .memory = memory->handle,
          .offset = 0,
-         .size = mem->size
+         .size = memory->size
       };
       vkFlushMappedMemoryRanges(device, 1, &range);
    }

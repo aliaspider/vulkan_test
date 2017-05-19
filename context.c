@@ -39,7 +39,7 @@ VkBool32 vulkan_debug_report_callback(VkDebugReportFlagsEXT flags,
 }
 
 
-void context_init(context_t* vk)
+void context_init(context_t* dst)
 {
    {
       const char *layers[] =
@@ -90,7 +90,7 @@ void context_init(context_t* vk)
          .enabledExtensionCount = countof(instance_ext),
          .ppEnabledExtensionNames = instance_ext
       };
-      vkCreateInstance(&info, NULL, &vk->instance);
+      vkCreateInstance(&info, NULL, &dst->instance);
    }
 
    {
@@ -105,27 +105,27 @@ void context_init(context_t* vk)
          .pfnCallback = vulkan_debug_report_callback,
          .pUserData = NULL
       };
-      vkCreateDebugReportCallbackEXT(vk->instance, &info, NULL, &vk->debug_cb);
+      vkCreateDebugReportCallbackEXT(dst->instance, &info, NULL, &dst->debug_cb);
    }
 
    {
       uint32_t one = 1;
-      vkEnumeratePhysicalDevices(vk->instance, &one, &vk->gpu);
+      vkEnumeratePhysicalDevices(dst->instance, &one, &dst->gpu);
 #if 0
       VkPhysicalDeviceProperties gpu_props;
       vkGetPhysicalDeviceProperties(vk->gpu, &gpu_props);
 #endif
    }
 
-   vkGetPhysicalDeviceMemoryProperties(vk->gpu, &vk->mem);
+   vkGetPhysicalDeviceMemoryProperties(dst->gpu, &dst->mem);
 
    {
       uint32_t queueFamilyPropertyCount;
-      vkGetPhysicalDeviceQueueFamilyProperties(vk->gpu, &queueFamilyPropertyCount, NULL);
+      vkGetPhysicalDeviceQueueFamilyProperties(dst->gpu, &queueFamilyPropertyCount, NULL);
       VkQueueFamilyProperties pQueueFamilyProperties[queueFamilyPropertyCount];
-      vkGetPhysicalDeviceQueueFamilyProperties(vk->gpu, &queueFamilyPropertyCount, pQueueFamilyProperties);
+      vkGetPhysicalDeviceQueueFamilyProperties(dst->gpu, &queueFamilyPropertyCount, pQueueFamilyProperties);
 
-      vk->queue_family_index = 0;
+      dst->queue_family_index = 0;
 
       int i;
       for (i = 0; i < queueFamilyPropertyCount; i++)
@@ -133,7 +133,7 @@ void context_init(context_t* vk)
          if ((pQueueFamilyProperties[i].queueFlags & (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_TRANSFER_BIT)) ==
                (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_TRANSFER_BIT))
          {
-            vk->queue_family_index = i;
+            dst->queue_family_index = i;
             break;
          }
       }
@@ -157,7 +157,7 @@ void context_init(context_t* vk)
       {
          VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
          .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-         .queueFamilyIndex = vk->queue_family_index,
+         .queueFamilyIndex = dst->queue_family_index,
          .queueCount = 1,
          .pQueuePriorities = &one
       };
@@ -170,11 +170,11 @@ void context_init(context_t* vk)
          .enabledExtensionCount = countof(device_ext),
          .ppEnabledExtensionNames = device_ext,
       };
-      vkCreateDevice(vk->gpu, &info, NULL, &vk->device);
+      vkCreateDevice(dst->gpu, &info, NULL, &dst->device);
    }
 
    /* get a device queue */
-   vkGetDeviceQueue(vk->device, vk->queue_family_index, 0, &vk->queue);
+   vkGetDeviceQueue(dst->device, dst->queue_family_index, 0, &dst->queue);
 
    /* create command buffer pool */
    {
@@ -182,22 +182,22 @@ void context_init(context_t* vk)
       {
          VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
          .flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-         .queueFamilyIndex = vk->queue_family_index
+         .queueFamilyIndex = dst->queue_family_index
       };
-      vkCreateCommandPool(vk->device, &info, NULL, &vk->cmd_pool);
+      vkCreateCommandPool(dst->device, &info, NULL, &dst->cmd_pool);
    }
 
 }
 
-void context_free(context_t* vk)
+void context_free(context_t* context)
 {
-   vkDestroyCommandPool(vk->device, vk->cmd_pool, NULL);
-   vkDestroyDevice(vk->device, NULL);
-   vkDestroyDebugReportCallbackEXT(vk->instance, vk->debug_cb, NULL);
-   vkDestroyInstance(vk->instance, NULL);
+   vkDestroyCommandPool(context->device, context->cmd_pool, NULL);
+   vkDestroyDevice(context->device, NULL);
+   vkDestroyDebugReportCallbackEXT(context->instance, context->debug_cb, NULL);
+   vkDestroyInstance(context->instance, NULL);
 
-   vk->cmd_pool = VK_NULL_HANDLE;
-   vk->device = VK_NULL_HANDLE;
-   vk->debug_cb = VK_NULL_HANDLE;
-   vk->instance = VK_NULL_HANDLE;
+   context->cmd_pool = VK_NULL_HANDLE;
+   context->device = VK_NULL_HANDLE;
+   context->debug_cb = VK_NULL_HANDLE;
+   context->instance = VK_NULL_HANDLE;
 }

@@ -1,11 +1,11 @@
 
 #include "vulkan.h"
 
-void texture_init(VkDevice device, const texture_init_info_t *init_info, texture_t* tex)
+void texture_init(VkDevice device, const texture_init_info_t *init_info, texture_t* dst)
 {
-   tex->width = init_info->width;
-   tex->height = init_info->height;
-   tex->dirty = true;
+   dst->width = init_info->width;
+   dst->height = init_info->height;
+   dst->dirty = true;
 
    {
       VkImageCreateInfo info =
@@ -14,8 +14,8 @@ void texture_init(VkDevice device, const texture_init_info_t *init_info, texture
          .flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT,
          .imageType = VK_IMAGE_TYPE_2D,
          .format = VK_FORMAT_R8G8B8A8_SRGB,
-         .extent.width = tex->width,
-         .extent.height = tex->height,
+         .extent.width = dst->width,
+         .extent.height = dst->height,
          .extent.depth = 1,
          .mipLevels = 1,
          .arrayLayers = 1,
@@ -27,14 +27,14 @@ void texture_init(VkDevice device, const texture_init_info_t *init_info, texture
          .pQueueFamilyIndices = &init_info->queue_family_index,
          .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
       };
-      tex->layout = info.initialLayout;
-      vkCreateImage(device, &info, NULL, &tex->image);
+      dst->layout = info.initialLayout;
+      vkCreateImage(device, &info, NULL, &dst->image);
 
       info.tiling = VK_IMAGE_TILING_LINEAR;
       info.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
       info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-      tex->staging.layout = info.initialLayout;
-      vkCreateImage(device, &info, NULL, &tex->staging.image);
+      dst->staging.layout = info.initialLayout;
+      vkCreateImage(device, &info, NULL, &dst->staging.image);
    }
 
    {
@@ -44,34 +44,34 @@ void texture_init(VkDevice device, const texture_init_info_t *init_info, texture
          .mipLevel = 0,
          .arrayLayer = 0
       };
-      vkGetImageSubresourceLayout(device, tex->image, &imageSubresource, &tex->mem_layout);
-      vkGetImageSubresourceLayout(device, tex->staging.image, &imageSubresource, &tex->staging.mem_layout);
+      vkGetImageSubresourceLayout(device, dst->image, &imageSubresource, &dst->mem_layout);
+      vkGetImageSubresourceLayout(device, dst->staging.image, &imageSubresource, &dst->staging.mem_layout);
    }
 
    {
       memory_init_info_t info = {init_info->memory_types};
 
       info.req_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-      info.image = tex->image;
-      memory_init(device, &info, &tex->mem);
+      info.image = dst->image;
+      memory_init(device, &info, &dst->mem);
 
       info.req_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-      info.image = tex->staging.image;
-      memory_init(device, &info, &tex->staging.mem);
+      info.image = dst->staging.image;
+      memory_init(device, &info, &dst->staging.mem);
    }
 
    {
       VkImageViewCreateInfo info =
       {
          VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-         .image = tex->image,
+         .image = dst->image,
          .viewType = VK_IMAGE_VIEW_TYPE_2D,
          .format = VK_FORMAT_R8G8B8A8_SRGB,
          .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
          .subresourceRange.levelCount = 1,
          .subresourceRange.layerCount = 1
       };
-      vkCreateImageView(device, &info, NULL, &tex->view);
+      vkCreateImageView(device, &info, NULL, &dst->view);
    }
 
    {
@@ -81,49 +81,49 @@ void texture_init(VkDevice device, const texture_init_info_t *init_info, texture
          .magFilter = VK_FILTER_LINEAR,
          .minFilter = VK_FILTER_LINEAR,
       };
-      vkCreateSampler(device, &samplerCreateInfo, NULL, &tex->sampler);
+      vkCreateSampler(device, &samplerCreateInfo, NULL, &dst->sampler);
    }
 }
 
 
-void texture_free(VkDevice device, texture_t *tex)
+void texture_free(VkDevice device, texture_t *texture)
 {
-   vkDestroySampler(device, tex->sampler, NULL);
-   vkDestroyImageView(device, tex->view, NULL);
-   vkDestroyImage(device, tex->image, NULL);
-   vkDestroyImage(device, tex->staging.image, NULL);
-   memory_free(device, &tex->mem);
-   memory_free(device, &tex->staging.mem);
-   tex->sampler = VK_NULL_HANDLE;
-   tex->view = VK_NULL_HANDLE;
-   tex->image = VK_NULL_HANDLE;
+   vkDestroySampler(device, texture->sampler, NULL);
+   vkDestroyImageView(device, texture->view, NULL);
+   vkDestroyImage(device, texture->image, NULL);
+   vkDestroyImage(device, texture->staging.image, NULL);
+   memory_free(device, &texture->mem);
+   memory_free(device, &texture->staging.mem);
+   texture->sampler = VK_NULL_HANDLE;
+   texture->view = VK_NULL_HANDLE;
+   texture->image = VK_NULL_HANDLE;
 }
 
-void texture_update(VkCommandBuffer cmd, texture_t* tex)
+void texture_update(VkCommandBuffer cmd, texture_t* texture)
 {
    VkImageMemoryBarrier barrier =
    {
       VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
       .srcAccessMask = VK_ACCESS_HOST_WRITE_BIT,
       .dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
-      .oldLayout = tex->staging.layout,
+      .oldLayout = texture->staging.layout,
       .newLayout = VK_IMAGE_LAYOUT_GENERAL,
       .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
       .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-      .image  = tex->staging.image,
+      .image  = texture->staging.image,
       .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
       .subresourceRange.levelCount = 1,
       .subresourceRange.layerCount = 1
    };
-   tex->staging.layout = barrier.newLayout;
+   texture->staging.layout = barrier.newLayout;
    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
 
    barrier.srcAccessMask = 0;
    barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
    barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
    barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-   barrier.image  = tex->image;
-   tex->layout = barrier.newLayout;
+   barrier.image  = texture->image;
+   texture->layout = barrier.newLayout;
    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
 
    {
@@ -133,19 +133,19 @@ void texture_update(VkCommandBuffer cmd, texture_t* tex)
          .srcSubresource.layerCount = 1,
          .dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
          .dstSubresource.layerCount = 1,
-         .extent.width = tex->width,
-         .extent.height = tex->height,
+         .extent.width = texture->width,
+         .extent.height = texture->height,
          .extent.depth = 1
       };
-      vkCmdCopyImage(cmd, tex->staging.image, tex->staging.layout, tex->image, tex->layout, 1, &copy);
+      vkCmdCopyImage(cmd, texture->staging.image, texture->staging.layout, texture->image, texture->layout, 1, &copy);
    }
 
    barrier.srcAccessMask = barrier.dstAccessMask;
    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
    barrier.oldLayout = barrier.newLayout;
    barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-   tex->layout = barrier.newLayout;
+   texture->layout = barrier.newLayout;
    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
 
-   tex->dirty = false;
+   texture->dirty = false;
 }

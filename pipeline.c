@@ -1,7 +1,7 @@
 
 #include "vulkan.h"
 
-void pipeline_init(VkDevice device, pipeline_init_info_t* init_info, pipeline_t* pipe)
+void pipeline_init(VkDevice device, pipeline_init_info_t* init_info, pipeline_t* dst)
 {
    {
 #if 0
@@ -23,7 +23,7 @@ void pipeline_init(VkDevice device, pipeline_init_info_t* init_info, pipeline_t*
 #endif
       };
 
-      vkCreatePipelineLayout(device, &info, NULL, &pipe->layout);
+      vkCreatePipelineLayout(device, &info, NULL, &dst->layout);
    }
 
    {
@@ -105,11 +105,11 @@ void pipeline_init(VkDevice device, pipeline_init_info_t* init_info, pipeline_t*
          .pRasterizationState = &rasterization_info,
          .pMultisampleState = &multisample_state,
          .pColorBlendState = &colorblend_state,
-         .layout = pipe->layout,
+         .layout = dst->layout,
          .renderPass = init_info->renderpass,
          .subpass = 0
       };
-      vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &info, NULL, &pipe->handle);
+      vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &info, NULL, &dst->handle);
    }
 }
 

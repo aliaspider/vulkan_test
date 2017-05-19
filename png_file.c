@@ -3,19 +3,19 @@
 #include <string.h>
 #include "png_file.h"
 
-void png_file_init(const char* filename, png_file_t* png)
+void png_file_init(const char* filename, png_file_t* dst)
 {
-   png->file = fopen(filename, "rb");
+   dst->file = fopen(filename, "rb");
 
-   png->handle = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-   png->info = png_create_info_struct(png->handle);
-   png_init_io(png->handle, png->file);
+   dst->handle = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+   dst->info = png_create_info_struct(dst->handle);
+   png_init_io(dst->handle, dst->file);
 
-   png_read_png(png->handle, png->info, PNG_TRANSFORM_IDENTITY, NULL);
+   png_read_png(dst->handle, dst->info, PNG_TRANSFORM_IDENTITY, NULL);
 
-   png->width = png_get_image_width(png->handle, png->info);
-   png->height = png_get_image_height(png->handle, png->info);
-   png->rows = png_get_rows(png->handle, png->info);
+   dst->width = png_get_image_width(dst->handle, dst->info);
+   dst->height = png_get_image_height(dst->handle, dst->info);
+   dst->rows = png_get_rows(dst->handle, dst->info);
 }
 
 void png_file_free(png_file_t* png)
