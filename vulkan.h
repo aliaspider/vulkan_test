@@ -174,7 +174,13 @@ typedef struct
 void pipeline_init(VkDevice device, pipeline_init_info_t* init_info, pipeline_t* pipe);
 void pipeline_free(const context_t* vk, pipeline_t* pipe);
 
-void buffer_memory_init(VkDevice device, const VkMemoryType* memory_types, VkBuffer buffer, VkMemoryPropertyFlags req_flags, device_memory_t* mem);
-void image_memory_init(VkDevice device, const VkMemoryType* memory_types, VkImage image, VkMemoryPropertyFlags req_flags, device_memory_t* mem);
+typedef struct
+{
+   const VkMemoryType* memory_types;
+   VkMemoryPropertyFlags req_flags;
+   VkBuffer buffer;
+   VkImage image;
+}memory_init_info_t;
+void memory_init(VkDevice device, const memory_init_info_t* init_info, device_memory_t* mem);
 void memory_free(const context_t* vk, device_memory_t* mem);
 void memory_flush(VkDevice device, const device_memory_t* mem);

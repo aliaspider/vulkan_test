@@ -16,7 +16,15 @@ void uniform_buffer_init(VkDevice device, const uniform_buffer_init_info_t *init
       vkCreateBuffer(device, &info, NULL, &ubo->handle);
    }
 
-   buffer_memory_init(device, init_info->memory_types, ubo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &ubo->mem);
+   {
+      memory_init_info_t info =
+      {
+         init_info->memory_types,
+         .req_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+         .buffer = ubo->handle
+      };
+      memory_init(device, &info, &ubo->mem);
+   }
 }
 
 void vertex_buffer_init(VkDevice device, const vertex_buffer_init_info_t *init_info, buffer_t *vbo)
@@ -33,7 +41,15 @@ void vertex_buffer_init(VkDevice device, const vertex_buffer_init_info_t *init_i
       vkCreateBuffer(device, &info, NULL, &vbo->handle);
    }
 
-   buffer_memory_init(device, init_info->memory_types, vbo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &vbo->mem);
+   {
+      memory_init_info_t info =
+      {
+         init_info->memory_types,
+         .req_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+         .buffer = vbo->handle
+      };
+      memory_init(device, &info, &vbo->mem);
+   }
 
    memcpy(vbo->mem.ptr, init_info->data, init_info->size);
    memory_flush(device, &vbo->mem);

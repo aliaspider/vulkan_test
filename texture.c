@@ -48,8 +48,17 @@ void texture_init(VkDevice device, const texture_init_info_t *init_info, texture
       vkGetImageSubresourceLayout(device, tex->staging.image, &imageSubresource, &tex->staging.mem_layout);
    }
 
-   image_memory_init(device, init_info->memory_types, tex->image, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &tex->mem);
-   image_memory_init(device, init_info->memory_types, tex->staging.image, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &tex->staging.mem);
+   {
+      memory_init_info_t info = {init_info->memory_types};
+
+      info.req_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+      info.image = tex->image;
+      memory_init(device, &info, &tex->mem);
+
+      info.req_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+      info.image = tex->staging.image;
+      memory_init(device, &info, &tex->staging.mem);
+   }
 
    {
       VkImageViewCreateInfo info =
