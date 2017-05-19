@@ -136,17 +136,12 @@ void texture_update(VkCommandBuffer cmd, texture_t* tex);
 
 typedef struct
 {
+   const VkMemoryType* memory_types;
+   VkBufferUsageFlags usage;
    uint32_t size;
    const void* data;
-   const VkMemoryType* memory_types;
-}vertex_buffer_init_info_t;
-void vertex_buffer_init(VkDevice device, const vertex_buffer_init_info_t *init_info, buffer_t *vbo);
-typedef struct
-{
-   uint32_t size;
-   const VkMemoryType* memory_types;
-}uniform_buffer_init_info_t;
-void uniform_buffer_init(VkDevice device, const uniform_buffer_init_info_t* init_info, buffer_t *ubo);
+}buffer_init_info_t;
+void buffer_init(VkDevice device, const buffer_init_info_t* init_info, buffer_t *ubo);
 void buffer_free(VkDevice device, buffer_t *buffer);
 
 typedef struct

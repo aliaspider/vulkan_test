@@ -160,23 +160,25 @@ int main(int argc, char **argv)
          {{-1.0f,  1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}}
       };
 
-      vertex_buffer_init_info_t info =
+      buffer_init_info_t info =
       {
+         .memory_types = vk.mem.memoryTypes,
+         .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
          .size = sizeof(vertices),
          .data = vertices,
-         .memory_types = vk.mem.memoryTypes
       };
-      vertex_buffer_init(vk.device, &info, &vbo);
+      buffer_init(vk.device, &info, &vbo);
    }
 
    buffer_t  ubo;
    {
-      uniform_buffer_init_info_t info =
+      buffer_init_info_t info =
       {
+         .memory_types = vk.mem.memoryTypes,
+         .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
          .size = sizeof(uniforms_t),
-         .memory_types = vk.mem.memoryTypes
       };
-      uniform_buffer_init(vk.device, &info, &ubo);
+      buffer_init(vk.device, &info, &ubo);
    }
 
    descriptor_t desc;
