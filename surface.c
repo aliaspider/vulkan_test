@@ -13,13 +13,15 @@ void surface_init(VkInstance instance, const surface_init_info_t* init_info, sur
    XMapWindow(surface->display, surface->window);
 
    /* init surface */
-   VkXlibSurfaceCreateInfoKHR xlibSurfaceCreateInfo =
    {
-      VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
-      .dpy = surface->display,
-      .window = surface->window
-   };
-   vkCreateXlibSurfaceKHR(instance, &xlibSurfaceCreateInfo, NULL, &surface->handle);
+      VkXlibSurfaceCreateInfoKHR info =
+      {
+         VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
+         .dpy = surface->display,
+         .window = surface->window
+      };
+      vkCreateXlibSurfaceKHR(instance, &info, NULL, &surface->handle);
+   }
 #else
 #error platform not supported
 #endif
