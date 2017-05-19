@@ -118,17 +118,16 @@ int main(int argc, char **argv)
       {
          texture_init_info_t info =
          {
+            .queue_family_index = vk.queue_family_index,
             .width = png.width,
             .height = png.height,
-            .memory_types = vk.mem.memoryTypes,
-            .queue_family_index = vk.queue_family_index,
          };
-         texture_init(vk.device, &info, &tex);
+         texture_init(vk.device, vk.mem.memoryTypes, &info, &tex);
       }
 
       /* texture updates are written to the stating texture then uploaded later */
       png_file_read(&png, tex.staging.mem.u8 + tex.staging.mem_layout.offset, tex.staging.mem_layout.rowPitch);
-      memory_flush(vk.device, &tex.staging.mem);
+      device_memory_flush(vk.device, &tex.staging.mem);
       tex.dirty = true;
 
       png_file_free(&png);
@@ -162,23 +161,21 @@ int main(int argc, char **argv)
 
       buffer_init_info_t info =
       {
-         .memory_types = vk.mem.memoryTypes,
          .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
          .size = sizeof(vertices),
          .data = vertices,
       };
-      buffer_init(vk.device, &info, &vbo);
+      buffer_init(vk.device, vk.mem.memoryTypes, &info, &vbo);
    }
 
    buffer_t  ubo;
    {
       buffer_init_info_t info =
       {
-         .memory_types = vk.mem.memoryTypes,
          .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
          .size = sizeof(uniforms_t),
       };
-      buffer_init(vk.device, &info, &ubo);
+      buffer_init(vk.device, vk.mem.memoryTypes, &info, &ubo);
    }
 
    descriptor_t desc;
@@ -367,7 +364,7 @@ int main(int argc, char **argv)
       frames++;
 
       if(handle_input(&surface, uniforms))
-         memory_flush(vk.device, &ubo.mem);
+         device_memory_flush(vk.device, &ubo.mem);
 
       if (diff > 0.5f)
       {

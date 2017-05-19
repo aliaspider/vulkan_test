@@ -1,7 +1,7 @@
 
 #include "vulkan.h"
 
-void memory_init(VkDevice device, const memory_init_info_t* init_info, device_memory_t* dst)
+void device_memory_init(VkDevice device, const VkMemoryType* memory_types, const memory_init_info_t* init_info, device_memory_t* dst)
 {
 
    VkMemoryRequirements reqs;
@@ -14,7 +14,7 @@ void memory_init(VkDevice device, const memory_init_info_t* init_info, device_me
    dst->size = reqs.size;
    dst->alignment = reqs.alignment;
 
-   const VkMemoryType* type = init_info->memory_types;
+   const VkMemoryType* type = memory_types;
    {
       uint32_t bits = reqs.memoryTypeBits;
       while(bits)
@@ -34,7 +34,7 @@ void memory_init(VkDevice device, const memory_init_info_t* init_info, device_me
       {
          VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
          .allocationSize = dst->size,
-         .memoryTypeIndex = type - init_info->memory_types
+         .memoryTypeIndex = type - memory_types
       };
       vkAllocateMemory(device, &info, NULL, &dst->handle);
    }
@@ -50,7 +50,7 @@ void memory_init(VkDevice device, const memory_init_info_t* init_info, device_me
       vkBindImageMemory(device, init_info->image, dst->handle, 0);
 }
 
-void memory_free(VkDevice device, device_memory_t* memory)
+void device_memory_free(VkDevice device, device_memory_t* memory)
 {
    if(memory->ptr)
       vkUnmapMemory(device, memory->handle);
@@ -62,7 +62,7 @@ void memory_free(VkDevice device, device_memory_t* memory)
    memory->handle = VK_NULL_HANDLE;
 }
 
-void memory_flush(VkDevice device, const device_memory_t* memory)
+void device_memory_flush(VkDevice device, const device_memory_t* memory)
 {
    if(memory->flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
       return;

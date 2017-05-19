@@ -2,7 +2,7 @@
 #include <string.h>
 #include "vulkan.h"
 
-void buffer_init(VkDevice device, const buffer_init_info_t *init_info, buffer_t *dst)
+void buffer_init(VkDevice device, const VkMemoryType *memory_types, const buffer_init_info_t *init_info, buffer_t *dst)
 {
    dst->size = init_info->size;
 
@@ -19,23 +19,22 @@ void buffer_init(VkDevice device, const buffer_init_info_t *init_info, buffer_t 
    {
       memory_init_info_t info =
       {
-         init_info->memory_types,
          .req_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
          .buffer = dst->handle
       };
-      memory_init(device, &info, &dst->mem);
+      device_memory_init(device, memory_types, &info, &dst->mem);
    }
 
    if(init_info->data)
    {
       memcpy(dst->mem.ptr, init_info->data, init_info->size);
-      memory_flush(device, &dst->mem);
+      device_memory_flush(device, &dst->mem);
    }
 }
 
 void buffer_free(VkDevice device, buffer_t *buffer)
 {
-   memory_free(device, &buffer->mem);
+   device_memory_free(device, &buffer->mem);
    vkDestroyBuffer(device, buffer->handle, NULL);
    buffer->handle = VK_NULL_HANDLE;
 }

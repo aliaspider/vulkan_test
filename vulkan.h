@@ -20,6 +20,9 @@ typedef struct
    VkCommandPool cmd_pool;
 }context_t;
 
+void context_init(context_t* dst);
+void context_free(context_t* context);
+
 typedef struct
 {
    VkSurfaceKHR handle;
@@ -30,6 +33,16 @@ typedef struct
    Window   window;
 #endif
 }surface_t;
+
+typedef struct
+{
+   VkPhysicalDevice gpu;
+   uint32_t queue_family_index;
+   int width;
+   int height;
+}surface_init_info_t;
+void surface_init(VkInstance instance, const surface_init_info_t* init_info, surface_t *dst);
+void surface_free(VkInstance instance, surface_t *surface);
 
 typedef struct
 {
@@ -44,6 +57,16 @@ typedef struct
 
 typedef struct
 {
+   VkSurfaceKHR surface;
+   int width;
+   int height;
+   VkPresentModeKHR present_mode;
+}swapchain_init_info_t;
+void swapchain_init(VkDevice device, const swapchain_init_info_t* init_info, swapchain_t *dst);
+void swapchain_free(VkDevice device, swapchain_t *chain);
+
+typedef struct
+{
    VkDeviceMemory handle;
    VkMemoryPropertyFlags flags;
    VkDeviceSize size;
@@ -52,13 +75,18 @@ typedef struct
    {
       void* ptr;
       uint8_t* u8;
-      uint32_t* u32;
-      uint64_t* u64;
-      int8_t* s8;
-      int32_t* s32;
-      int64_t* s64;
    };
 }device_memory_t;
+
+typedef struct
+{
+   VkMemoryPropertyFlags req_flags;
+   VkBuffer buffer;
+   VkImage image;
+}memory_init_info_t;
+void device_memory_init(VkDevice device, const VkMemoryType* memory_types, const memory_init_info_t* init_info, device_memory_t* dst);
+void device_memory_free(VkDevice device, device_memory_t* memory);
+void device_memory_flush(VkDevice device, const device_memory_t* memory);
 
 typedef struct
 {
@@ -82,10 +110,29 @@ typedef struct
 
 typedef struct
 {
+   uint32_t queue_family_index;
+   int width;
+   int height;
+}texture_init_info_t;
+void texture_init(VkDevice device, const VkMemoryType* memory_types, const texture_init_info_t *init_info, texture_t* dst);
+void texture_free(VkDevice device, texture_t* texture);
+void texture_update(VkCommandBuffer cmd, texture_t* texture);
+
+typedef struct
+{
    device_memory_t mem;
    VkBuffer handle;
    VkDeviceSize size;
 }buffer_t;
+
+typedef struct
+{
+   VkBufferUsageFlags usage;
+   uint32_t size;
+   const void* data;
+}buffer_init_info_t;
+void buffer_init(VkDevice device, const VkMemoryType* memory_types, const buffer_init_info_t* init_info, buffer_t *dst);
+void buffer_free(VkDevice device, buffer_t *buffer);
 
 typedef struct
 {
@@ -96,56 +143,6 @@ typedef struct
 
 typedef struct
 {
-   VkPipeline handle;
-   VkPipelineLayout layout;
-}pipeline_t;
-
-void context_init(context_t* dst);
-void context_free(context_t* context);
-
-typedef struct
-{
-   VkPhysicalDevice gpu;
-   uint32_t queue_family_index;
-   int width;
-   int height;
-}surface_init_info_t;
-void surface_init(VkInstance instance, const surface_init_info_t* init_info, surface_t *dst);
-void surface_free(VkInstance instance, surface_t *surface);
-
-typedef struct
-{
-   VkSurfaceKHR surface;
-   int width;
-   int height;
-   VkPresentModeKHR present_mode;
-}swapchain_init_info_t;
-void swapchain_init(VkDevice device, const swapchain_init_info_t* init_info, swapchain_t *dst);
-void swapchain_free(VkDevice device, swapchain_t *chain);
-
-typedef struct
-{
-   int width;
-   int height;
-   const VkMemoryType* memory_types;
-   uint32_t queue_family_index;
-}texture_init_info_t;
-void texture_init(VkDevice device, const texture_init_info_t *init_info, texture_t* dst);
-void texture_free(VkDevice device, texture_t* texture);
-void texture_update(VkCommandBuffer cmd, texture_t* texture);
-
-typedef struct
-{
-   const VkMemoryType* memory_types;
-   VkBufferUsageFlags usage;
-   uint32_t size;
-   const void* data;
-}buffer_init_info_t;
-void buffer_init(VkDevice device, const buffer_init_info_t* init_info, buffer_t *dst);
-void buffer_free(VkDevice device, buffer_t *buffer);
-
-typedef struct
-{
    VkBuffer ubo_buffer;
    VkDeviceSize ubo_range;
    VkSampler sampler;
@@ -153,6 +150,12 @@ typedef struct
 }descriptors_init_info_t;
 void descriptors_init(VkDevice device, const descriptors_init_info_t* init_info, descriptor_t* dst);
 void descriptors_free(VkDevice device, descriptor_t* descriptor);
+
+typedef struct
+{
+   VkPipeline handle;
+   VkPipelineLayout layout;
+}pipeline_t;
 
 typedef struct
 {
@@ -168,14 +171,3 @@ typedef struct
 }pipeline_init_info_t;
 void pipeline_init(VkDevice device, const pipeline_init_info_t* init_info, pipeline_t* dst);
 void pipeline_free(VkDevice device, pipeline_t* pipe);
-
-typedef struct
-{
-   const VkMemoryType* memory_types;
-   VkMemoryPropertyFlags req_flags;
-   VkBuffer buffer;
-   VkImage image;
-}memory_init_info_t;
-void memory_init(VkDevice device, const memory_init_info_t* init_info, device_memory_t* dst);
-void memory_free(VkDevice device, device_memory_t* memory);
-void memory_flush(VkDevice device, const device_memory_t* memory);

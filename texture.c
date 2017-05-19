@@ -1,7 +1,7 @@
 
 #include "vulkan.h"
 
-void texture_init(VkDevice device, const texture_init_info_t *init_info, texture_t* dst)
+void texture_init(VkDevice device, const VkMemoryType *memory_types, const texture_init_info_t *init_info, texture_t* dst)
 {
    dst->width = init_info->width;
    dst->height = init_info->height;
@@ -49,15 +49,20 @@ void texture_init(VkDevice device, const texture_init_info_t *init_info, texture
    }
 
    {
-      memory_init_info_t info = {init_info->memory_types};
-
-      info.req_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-      info.image = dst->image;
-      memory_init(device, &info, &dst->mem);
-
-      info.req_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-      info.image = dst->staging.image;
-      memory_init(device, &info, &dst->staging.mem);
+      memory_init_info_t info =
+      {
+         .req_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+         .image = dst->image
+      };
+      device_memory_init(device, memory_types, &info, &dst->mem);
+   }
+   {
+      memory_init_info_t info =
+      {
+         .req_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+         .image = dst->staging.image
+      };
+      device_memory_init(device, memory_types, &info, &dst->staging.mem);
    }
 
    {
@@ -92,8 +97,8 @@ void texture_free(VkDevice device, texture_t *texture)
    vkDestroyImageView(device, texture->view, NULL);
    vkDestroyImage(device, texture->image, NULL);
    vkDestroyImage(device, texture->staging.image, NULL);
-   memory_free(device, &texture->mem);
-   memory_free(device, &texture->staging.mem);
+   device_memory_free(device, &texture->mem);
+   device_memory_free(device, &texture->staging.mem);
    texture->sampler = VK_NULL_HANDLE;
    texture->view = VK_NULL_HANDLE;
    texture->image = VK_NULL_HANDLE;
