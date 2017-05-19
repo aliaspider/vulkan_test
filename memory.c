@@ -1,18 +1,6 @@
 
 #include "vulkan.h"
 
-void memory_free(const context_t* vk, device_memory_t* mem)
-{
-   if(mem->ptr)
-      vkUnmapMemory(vk->device, mem->handle);
-
-   vkFreeMemory(vk->device, mem->handle, NULL);
-
-   mem->ptr = NULL;
-   mem->flags = 0;
-   mem->handle = VK_NULL_HANDLE;
-}
-
 void memory_init(VkDevice device, const memory_init_info_t* init_info, device_memory_t* mem)
 {
 
@@ -31,7 +19,7 @@ void memory_init(VkDevice device, const memory_init_info_t* init_info, device_me
       uint32_t bits = reqs.memoryTypeBits;
       while(bits)
       {
-         if((bits & 1) && (type->propertyFlags & init_info->req_flags) == init_info->req_flags)
+         if((bits & 1) && ((type->propertyFlags & init_info->req_flags) == init_info->req_flags))
             break;
 
          bits >>= 1;
@@ -60,6 +48,18 @@ void memory_init(VkDevice device, const memory_init_info_t* init_info, device_me
       vkBindBufferMemory(device, init_info->buffer, mem->handle, 0);
    else
       vkBindImageMemory(device, init_info->image, mem->handle, 0);
+}
+
+void memory_free(VkDevice device, device_memory_t* mem)
+{
+   if(mem->ptr)
+      vkUnmapMemory(device, mem->handle);
+
+   vkFreeMemory(device, mem->handle, NULL);
+
+   mem->ptr = NULL;
+   mem->flags = 0;
+   mem->handle = VK_NULL_HANDLE;
 }
 
 void memory_flush(VkDevice device, const device_memory_t* mem)

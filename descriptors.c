@@ -99,10 +99,10 @@ void descriptors_init(VkDevice device, const descriptors_init_info_t *init_info,
    }
 }
 
-void descriptors_free(const context_t *vk, descriptor_t *desc)
+void descriptors_free(VkDevice device, descriptor_t *desc)
 {
-   vkDestroyDescriptorPool(vk->device, desc->pool, NULL);
-   vkDestroyDescriptorSetLayout(vk->device, desc->set_layout, NULL);
+   vkDestroyDescriptorPool(device, desc->pool, NULL);
+   vkDestroyDescriptorSetLayout(device, desc->set_layout, NULL);
    desc->pool = VK_NULL_HANDLE;
    desc->set_layout = VK_NULL_HANDLE;
 }

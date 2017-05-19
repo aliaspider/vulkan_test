@@ -58,9 +58,9 @@ void vertex_buffer_init(VkDevice device, const vertex_buffer_init_info_t *init_i
    vbo->mem.ptr = NULL;
 }
 
-void buffer_free(const context_t *vk, buffer_t *buffer)
+void buffer_free(VkDevice device, buffer_t *buffer)
 {
-   memory_free(vk, &buffer->mem);
-   vkDestroyBuffer(vk->device, buffer->handle, NULL);
+   memory_free(device, &buffer->mem);
+   vkDestroyBuffer(device, buffer->handle, NULL);
    buffer->handle = VK_NULL_HANDLE;
 }

@@ -383,12 +383,12 @@ int main(int argc, char **argv)
    vkWaitForFences(vk.device, 1, &chain_fence, VK_TRUE, UINT64_MAX);
    vkDestroyFence(vk.device, chain_fence, NULL);
 
-   pipeline_free(&vk, &pipe);
-   descriptors_free(&vk, &desc);
-   buffer_free(&vk, &ubo);
-   buffer_free(&vk, &vbo);
-   texture_free(&vk, &tex);
-   swapchain_free(&vk, &chain);
+   pipeline_free(vk.device, &pipe);
+   descriptors_free(vk.device, &desc);
+   buffer_free(vk.device, &ubo);
+   buffer_free(vk.device, &vbo);
+   texture_free(vk.device, &tex);
+   swapchain_free(vk.device, &chain);
    surface_free(vk.instance, &surface);
    context_free(&vk);
 

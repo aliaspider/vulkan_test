@@ -105,18 +105,18 @@ void swapchain_init(VkDevice device, const swapchain_init_info_t *init_info, swa
    chain->scissor.extent.height = init_info->height;
 }
 
-void swapchain_free(const context_t *vk, swapchain_t *chain)
+void swapchain_free(VkDevice device, swapchain_t *chain)
 {
    int i;
    for (i = 0; i < chain->count; i++)
    {
-      vkDestroyImageView(vk->device, chain->views[i], NULL);
-      vkDestroyFramebuffer(vk->device, chain->framebuffers[i], NULL);
+      vkDestroyImageView(device, chain->views[i], NULL);
+      vkDestroyFramebuffer(device, chain->framebuffers[i], NULL);
       chain->views[i] = VK_NULL_HANDLE;
       chain->framebuffers[i] = VK_NULL_HANDLE;
    }
-   vkDestroySwapchainKHR(vk->device, chain->handle, NULL);
-   vkDestroyRenderPass(vk->device, chain->renderpass, NULL);
+   vkDestroySwapchainKHR(device, chain->handle, NULL);
+   vkDestroyRenderPass(device, chain->renderpass, NULL);
 
    chain->handle = VK_NULL_HANDLE;
    chain->renderpass = VK_NULL_HANDLE;

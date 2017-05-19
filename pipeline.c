@@ -113,10 +113,10 @@ void pipeline_init(VkDevice device, pipeline_init_info_t* init_info, pipeline_t*
    }
 }
 
-void pipeline_free(const context_t *vk, pipeline_t *pipe)
+void pipeline_free(VkDevice device, pipeline_t *pipe)
 {
-   vkDestroyPipelineLayout(vk->device, pipe->layout, NULL);
-   vkDestroyPipeline(vk->device, pipe->handle, NULL);
+   vkDestroyPipelineLayout(device, pipe->layout, NULL);
+   vkDestroyPipeline(device, pipe->handle, NULL);
    pipe->layout = VK_NULL_HANDLE;
    pipe->handle = VK_NULL_HANDLE;
 }

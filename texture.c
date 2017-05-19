@@ -86,14 +86,14 @@ void texture_init(VkDevice device, const texture_init_info_t *init_info, texture
 }
 
 
-void texture_free(const context_t *vk, texture_t *tex)
+void texture_free(VkDevice device, texture_t *tex)
 {
-   vkDestroySampler(vk->device, tex->sampler, NULL);
-   vkDestroyImageView(vk->device, tex->view, NULL);
-   vkDestroyImage(vk->device, tex->image, NULL);
-   vkDestroyImage(vk->device, tex->staging.image, NULL);
-   memory_free(vk, &tex->mem);
-   memory_free(vk, &tex->staging.mem);
+   vkDestroySampler(device, tex->sampler, NULL);
+   vkDestroyImageView(device, tex->view, NULL);
+   vkDestroyImage(device, tex->image, NULL);
+   vkDestroyImage(device, tex->staging.image, NULL);
+   memory_free(device, &tex->mem);
+   memory_free(device, &tex->staging.mem);
    tex->sampler = VK_NULL_HANDLE;
    tex->view = VK_NULL_HANDLE;
    tex->image = VK_NULL_HANDLE;

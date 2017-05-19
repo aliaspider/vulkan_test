@@ -121,7 +121,7 @@ typedef struct
    VkPresentModeKHR present_mode;
 }swapchain_init_info_t;
 void swapchain_init(VkDevice device, const swapchain_init_info_t* init_info, swapchain_t *chain);
-void swapchain_free(const context_t *vk, swapchain_t *chain);
+void swapchain_free(VkDevice device, swapchain_t *chain);
 
 typedef struct
 {
@@ -131,7 +131,7 @@ typedef struct
    uint32_t queue_family_index;
 }texture_init_info_t;
 void texture_init(VkDevice device, const texture_init_info_t *init_info, texture_t* tex);
-void texture_free(const context_t* vk, texture_t* tex);
+void texture_free(VkDevice device, texture_t* tex);
 void texture_update(VkCommandBuffer cmd, texture_t* tex);
 
 typedef struct
@@ -147,7 +147,7 @@ typedef struct
    const VkMemoryType* memory_types;
 }uniform_buffer_init_info_t;
 void uniform_buffer_init(VkDevice device, const uniform_buffer_init_info_t* init_info, buffer_t *ubo);
-void buffer_free(const context_t *vk, buffer_t *buffer);
+void buffer_free(VkDevice device, buffer_t *buffer);
 
 typedef struct
 {
@@ -157,7 +157,7 @@ typedef struct
    VkImageView image_view;
 }descriptors_init_info_t;
 void descriptors_init(VkDevice device, const descriptors_init_info_t* init_info, descriptor_t* desc);
-void descriptors_free(const context_t* vk, descriptor_t* desc);
+void descriptors_free(VkDevice device, descriptor_t* desc);
 
 typedef struct
 {
@@ -172,7 +172,7 @@ typedef struct
    VkRenderPass renderpass;
 }pipeline_init_info_t;
 void pipeline_init(VkDevice device, pipeline_init_info_t* init_info, pipeline_t* pipe);
-void pipeline_free(const context_t* vk, pipeline_t* pipe);
+void pipeline_free(VkDevice device, pipeline_t* pipe);
 
 typedef struct
 {
@@ -182,5 +182,5 @@ typedef struct
    VkImage image;
 }memory_init_info_t;
 void memory_init(VkDevice device, const memory_init_info_t* init_info, device_memory_t* mem);
-void memory_free(const context_t* vk, device_memory_t* mem);
+void memory_free(VkDevice device, device_memory_t* mem);
 void memory_flush(VkDevice device, const device_memory_t* mem);
