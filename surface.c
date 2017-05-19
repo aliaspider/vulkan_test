@@ -4,7 +4,7 @@
 void surface_init(VkInstance instance, const surface_init_info_t* init_info, surface_t *surface)
 {
    /* init display and window */
-   #ifdef VK_USE_PLATFORM_XLIB_KHR
+#ifdef VK_USE_PLATFORM_XLIB_KHR
    XInitThreads();
    surface->display = XOpenDisplay(NULL);
    surface->window  = XCreateSimpleWindow(surface->display, DefaultRootWindow(surface->display), 0, 0, init_info->width, init_info->height, 0, 0, 0);
@@ -20,9 +20,9 @@ void surface_init(VkInstance instance, const surface_init_info_t* init_info, sur
       .window = surface->window
    };
    vkCreateXlibSurfaceKHR(instance, &xlibSurfaceCreateInfo, NULL, &surface->handle);
-   #else
-   #error platform not supported
-   #endif
+#else
+#error platform not supported
+#endif
 
    /* init swapchain */
    VkSurfaceCapabilitiesKHR surfaceCapabilities;
