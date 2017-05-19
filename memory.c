@@ -67,12 +67,14 @@ void memory_flush(VkDevice device, const device_memory_t* mem)
    if(mem->flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
       return;
 
-   VkMappedMemoryRange mappedUniformsMemoryRange =
    {
-      VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
-      .memory = mem->handle,
-      .offset = 0,
-      .size = mem->size
-   };
-   vkFlushMappedMemoryRanges(device, 1, &mappedUniformsMemoryRange);
+      VkMappedMemoryRange range =
+      {
+         VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+         .memory = mem->handle,
+         .offset = 0,
+         .size = mem->size
+      };
+      vkFlushMappedMemoryRanges(device, 1, &range);
+   }
 }
