@@ -115,7 +115,16 @@ int main(int argc, char **argv)
       png_file_t png;
       png_file_init("texture.png", &png);
 
-      texture_init(&vk, png.width, png.height, &tex);
+      {
+         texture_init_info_t info =
+         {
+            .width = png.width,
+            .height = png.height,
+            .memory_types = vk.mem.memoryTypes,
+            .queue_family_index = vk.queue_family_index,
+         };
+         texture_init(vk.device, &info, &tex);
+      }
 
       /* texture updates are written to the stating texture then uploaded later */
       png_file_read(&png, tex.staging.mem.u8 + tex.staging.mem_layout.offset, tex.staging.mem_layout.rowPitch);

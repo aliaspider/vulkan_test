@@ -1,9 +1,9 @@
 
 #include "vulkan.h"
 
-void memory_init(const context_t* vk, const VkMemoryRequirements* reqs, VkMemoryPropertyFlags req_flags, device_memory_t* mem)
+void memory_init(VkDevice device, const VkMemoryType* memory_types, const VkMemoryRequirements* reqs, VkMemoryPropertyFlags req_flags, device_memory_t* mem)
 {
-   const VkMemoryType* type = vk->mem.memoryTypes;
+   const VkMemoryType* type = memory_types;
    uint32_t bits = reqs->memoryTypeBits;
 
    while(bits)
@@ -19,13 +19,13 @@ void memory_init(const context_t* vk, const VkMemoryRequirements* reqs, VkMemory
             {
                VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
                .allocationSize = reqs->size,
-               .memoryTypeIndex = type - vk->mem.memoryTypes
+               .memoryTypeIndex = type - memory_types
             };
-            vkAllocateMemory(vk->device, &info, NULL, &mem->handle);
+            vkAllocateMemory(device, &info, NULL, &mem->handle);
          }
 
          if(req_flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-            vkMapMemory(vk->device, mem->handle, 0, mem->size, 0, &mem->ptr);
+            vkMapMemory(device, mem->handle, 0, mem->size, 0, &mem->ptr);
          else
             mem->ptr = NULL;
 
@@ -48,24 +48,24 @@ void memory_free(const context_t* vk, device_memory_t* mem)
    mem->handle = VK_NULL_HANDLE;
 }
 
-void buffer_memory_init(const context_t* vk, VkBuffer buffer, VkMemoryPropertyFlags req_flags, device_memory_t* mem)
+void buffer_memory_init(VkDevice device, const VkMemoryType* memory_types, VkBuffer buffer, VkMemoryPropertyFlags req_flags, device_memory_t* mem)
 {
    VkMemoryRequirements reqs;
-   vkGetBufferMemoryRequirements(vk->device, buffer, &reqs);
+   vkGetBufferMemoryRequirements(device, buffer, &reqs);
 
-   memory_init(vk, &reqs, req_flags, mem);
+   memory_init(device, memory_types, &reqs, req_flags, mem);
 
-   vkBindBufferMemory(vk->device, buffer, mem->handle, 0);
+   vkBindBufferMemory(device, buffer, mem->handle, 0);
 }
 
-void image_memory_init(const context_t* vk, VkImage image, VkMemoryPropertyFlags req_flags, device_memory_t* mem)
+void image_memory_init(VkDevice device, const VkMemoryType* memory_types, VkImage image, VkMemoryPropertyFlags req_flags, device_memory_t* mem)
 {
    VkMemoryRequirements reqs;
-   vkGetImageMemoryRequirements(vk->device, image, &reqs);
+   vkGetImageMemoryRequirements(device, image, &reqs);
 
-   memory_init(vk, &reqs, req_flags, mem);
+   memory_init(device, memory_types, &reqs, req_flags, mem);
 
-   vkBindImageMemory(vk->device, image, mem->handle, 0);
+   vkBindImageMemory(device, image, mem->handle, 0);
 }
 
 void memory_flush(const context_t* vk, const device_memory_t* mem)

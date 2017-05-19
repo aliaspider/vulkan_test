@@ -1,10 +1,10 @@
 
 #include "vulkan.h"
 
-void texture_init(const context_t *vk, int width, int height, texture_t* tex)
+void texture_init(VkDevice device, texture_init_info_t* init_info, texture_t* tex)
 {
-   tex->width = width;
-   tex->height = height;
+   tex->width = init_info->width;
+   tex->height = init_info->height;
    tex->dirty = true;
 
    {
@@ -14,8 +14,8 @@ void texture_init(const context_t *vk, int width, int height, texture_t* tex)
          .flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT,
          .imageType = VK_IMAGE_TYPE_2D,
          .format = VK_FORMAT_R8G8B8A8_SRGB,
-         .extent.width = width,
-         .extent.height = height,
+         .extent.width = tex->width,
+         .extent.height = tex->height,
          .extent.depth = 1,
          .mipLevels = 1,
          .arrayLayers = 1,
@@ -24,17 +24,17 @@ void texture_init(const context_t *vk, int width, int height, texture_t* tex)
          .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
          .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
          .queueFamilyIndexCount = 1,
-         .pQueueFamilyIndices = &vk->queue_family_index,
+         .pQueueFamilyIndices = &init_info->queue_family_index,
          .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
       };
       tex->layout = info.initialLayout;
-      vkCreateImage(vk->device, &info, NULL, &tex->image);
+      vkCreateImage(device, &info, NULL, &tex->image);
 
       info.tiling = VK_IMAGE_TILING_LINEAR;
       info.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
       info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
       tex->staging.layout = info.initialLayout;
-      vkCreateImage(vk->device, &info, NULL, &tex->staging.image);
+      vkCreateImage(device, &info, NULL, &tex->staging.image);
    }
 
    {
@@ -44,12 +44,12 @@ void texture_init(const context_t *vk, int width, int height, texture_t* tex)
          .mipLevel = 0,
          .arrayLayer = 0
       };
-      vkGetImageSubresourceLayout(vk->device, tex->image, &imageSubresource, &tex->mem_layout);
-      vkGetImageSubresourceLayout(vk->device, tex->staging.image, &imageSubresource, &tex->staging.mem_layout);
+      vkGetImageSubresourceLayout(device, tex->image, &imageSubresource, &tex->mem_layout);
+      vkGetImageSubresourceLayout(device, tex->staging.image, &imageSubresource, &tex->staging.mem_layout);
    }
 
-   image_memory_init(vk, tex->image, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &tex->mem);
-   image_memory_init(vk, tex->staging.image, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &tex->staging.mem);
+   image_memory_init(device, init_info->memory_types, tex->image, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &tex->mem);
+   image_memory_init(device, init_info->memory_types, tex->staging.image, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &tex->staging.mem);
 
    {
       VkImageViewCreateInfo info =
@@ -62,7 +62,7 @@ void texture_init(const context_t *vk, int width, int height, texture_t* tex)
          .subresourceRange.levelCount = 1,
          .subresourceRange.layerCount = 1
       };
-      vkCreateImageView(vk->device, &info, NULL, &tex->view);
+      vkCreateImageView(device, &info, NULL, &tex->view);
    }
 
    {
@@ -72,7 +72,7 @@ void texture_init(const context_t *vk, int width, int height, texture_t* tex)
          .magFilter = VK_FILTER_LINEAR,
          .minFilter = VK_FILTER_LINEAR,
       };
-      vkCreateSampler(vk->device, &samplerCreateInfo, NULL, &tex->sampler);
+      vkCreateSampler(device, &samplerCreateInfo, NULL, &tex->sampler);
    }
 }
 

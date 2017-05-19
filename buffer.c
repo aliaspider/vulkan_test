@@ -16,7 +16,7 @@ void uniform_buffer_init(const context_t *vk, uint32_t size, buffer_t* ubo)
       vkCreateBuffer(vk->device, &info, NULL, &ubo->handle);
    }
 
-   buffer_memory_init(vk, ubo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &ubo->mem);
+   buffer_memory_init(vk->device, vk->mem.memoryTypes, ubo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &ubo->mem);
 }
 
 void vertex_buffer_init(const context_t *vk, uint32_t size, const void *data, buffer_t* vbo)
@@ -33,7 +33,7 @@ void vertex_buffer_init(const context_t *vk, uint32_t size, const void *data, bu
       vkCreateBuffer(vk->device, &info, NULL, &vbo->handle);
    }
 
-   buffer_memory_init(vk, vbo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &vbo->mem);
+   buffer_memory_init(vk->device, vk->mem.memoryTypes, vbo->handle, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &vbo->mem);
 
    memcpy(vbo->mem.ptr, data, size);
    memory_flush(vk, &vbo->mem);
