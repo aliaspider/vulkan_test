@@ -151,7 +151,7 @@ void context_init(context_t* vk)
    /* init device */
    {
       const float one = 1.0;
-      const char *device_ext[] = {"VK_KHR_swapchain"};
+      const char *device_ext[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
       const VkDeviceQueueCreateInfo queue_info =
       {
