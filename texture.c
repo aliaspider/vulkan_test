@@ -99,7 +99,7 @@ void texture_free(VkDevice device, texture_t *texture)
    texture->image = VK_NULL_HANDLE;
 }
 
-void texture_update(VkCommandBuffer cmd, texture_t* texture)
+void texture_update(VkCommandBuffer cmd, texture_t *texture)
 {
    VkImageMemoryBarrier barrier =
    {

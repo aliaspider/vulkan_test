@@ -166,7 +166,7 @@ typedef struct
    const VkViewport* viewport;
    VkRenderPass renderpass;
 }pipeline_init_info_t;
-void pipeline_init(VkDevice device, pipeline_init_info_t* init_info, pipeline_t* dst);
+void pipeline_init(VkDevice device, const pipeline_init_info_t* init_info, pipeline_t* dst);
 void pipeline_free(VkDevice device, pipeline_t* pipe);
 
 typedef struct

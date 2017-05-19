@@ -1,7 +1,7 @@
 
 #include "vulkan.h"
 
-void pipeline_init(VkDevice device, pipeline_init_info_t* init_info, pipeline_t* dst)
+void pipeline_init(VkDevice device, const pipeline_init_info_t *init_info, pipeline_t* dst)
 {
    {
 #if 0
