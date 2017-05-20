@@ -16,21 +16,17 @@ void physical_device_init(VkInstance instance, physical_device_t* dst)
    {
       uint32_t one = 1;
       vkEnumeratePhysicalDevices(instance, &one, &dst->handle);
-#if 0
-      VkPhysicalDeviceProperties gpu_props;
-      vkGetPhysicalDeviceProperties(vk->gpu, &gpu_props);
-#endif
    }
 
    vkGetPhysicalDeviceMemoryProperties(dst->handle, &dst->mem);
 
 #if 0
-   {
-      uint32_t deviceExtensionPropertiesCount;
-      vkEnumerateDeviceExtensionProperties(vk->gpu, NULL, &deviceExtensionPropertiesCount, NULL);
-      VkExtensionProperties pDeviceExtensionProperties[deviceExtensionPropertiesCount];
-      vkEnumerateDeviceExtensionProperties(vk->gpu, NULL, &deviceExtensionPropertiesCount, pDeviceExtensionProperties);
-   }
+   VkPhysicalDeviceProperties gpu_props;
+   vkGetPhysicalDeviceProperties(vk->gpu, &gpu_props);
+   uint32_t deviceExtensionPropertiesCount;
+   vkEnumerateDeviceExtensionProperties(vk->gpu, NULL, &deviceExtensionPropertiesCount, NULL);
+   VkExtensionProperties pDeviceExtensionProperties[deviceExtensionPropertiesCount];
+   vkEnumerateDeviceExtensionProperties(vk->gpu, NULL, &deviceExtensionPropertiesCount, pDeviceExtensionProperties);
 #endif
 }
 
